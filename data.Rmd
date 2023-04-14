@@ -9,6 +9,8 @@ library(tidyverse)
 library(ggplot2)
 ```
 
+Let's glimpse the datasets to get an overview of what variables we'll be working with.
+
 ```{r}
 # Glimpse data
 attorneys_data <- read_csv("data/DataFest_2023_Data/attorneys.csv")
@@ -39,7 +41,7 @@ statesites <- read_csv("data/DataFest_2023_Data/statesites.csv")
 
 glimpse(statesites)
 
-subcategories <- read_csv("data/DataFest_2023_Data/statesites.csv")
+subcategories <- read_csv("data/DataFest_2023_Data/subcategories.csv")
 
 glimpse(subcategories)
 ```
