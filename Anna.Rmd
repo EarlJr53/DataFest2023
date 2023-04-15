@@ -1,5 +1,5 @@
 ---
-title: "data"
+title: "Anna exploration"
 output: html_document
 date: "2023-04-14"
 ---
@@ -13,33 +13,86 @@ library(ggplot2)
 # Glimpse data
 attorneys_data <- read_csv("data/DataFest_2023_Data/attorneys.csv")
 
-glimpse(attorneys_data)
+#glimpse(attorneys_data)
 
 attorneytimeentries <- read_csv("data/DataFest_2023_Data/attorneytimeentries.csv")
 
-glimpse(attorneytimeentries)
+#glimpse(attorneytimeentries)
 
 categories <- read_csv("data/DataFest_2023_Data/categories.csv")
 
-glimpse(categories)
+#glimpse(categories)
 
 clients <- read_csv("data/DataFest_2023_Data/clients.csv")
 
-glimpse(clients)
+#glimpse(clients)
 
 questionposts <- read_csv("data/DataFest_2023_Data/questionposts.csv")
 
-glimpse(questionposts)
+#glimpse(questionposts)
 
 questions <- read_csv("data/DataFest_2023_Data/questions.csv")
 
-glimpse(questions)
+#glimpse(questions)
 
 statesites <- read_csv("data/DataFest_2023_Data/statesites.csv")
 
-glimpse(statesites)
+#glimpse(statesites)
 
 subcategories <- read_csv("data/DataFest_2023_Data/statesites.csv")
 
-glimpse(subcategories)
+#glimpse(subcategories)
+```
+
+```{r}
+questionposts %>%
+  filter(str_detect(PostText, "transgender")) %>%
+  left_join(questions, by = "QuestionUno") %>%
+  group_by(Category, Subcategory) %>%
+  summarize()
+
+```
+
+```{r}
+questions%>% 
+  filter(StateAbbr=='MA') %>% 
+  count(Subcategory) %>% 
+  arrange(desc(n))
+
+questions%>% 
+  count(Subcategory) %>% 
+  arrange(desc(n))
+```
+
+```{r}
+questions%>% 
+  filter(StateAbbr=='MA') %>% 
+  count(Category) %>% 
+  arrange(desc(n))
+
+attorneys_data %>% 
+  group_by(StateAbbr) %>% 
+  count() %>% 
+  arrange(desc(n))
+```
+
+```{r}
+statesites %>% 
+  arrange(desc(BaseIncomeLimit))
+
+statesites %>% 
+  arrange(desc(IncomeMultiplier))
+
+statesites %>% 
+  arrange(desc(AllowedAssets))
+
+statesites %>% 
+  filter(StateAbbr=='PA')
+```
+
+```{r}
+questions%>% 
+  filter(StateAbbr=='TX', ) %>% 
+  count(Subcategory) %>% 
+  arrange(desc(n))
 ```
