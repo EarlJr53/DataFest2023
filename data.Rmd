@@ -15,33 +15,44 @@ Let's glimpse the datasets to get an overview of what variables we'll be working
 # Glimpse data
 attorneys_data <- read_csv("data/DataFest_2023_Data/attorneys.csv")
 
-glimpse(attorneys_data)
+# glimpse(attorneys_data)
 
 attorneytimeentries <- read_csv("data/DataFest_2023_Data/attorneytimeentries.csv")
 
-glimpse(attorneytimeentries)
+# glimpse(attorneytimeentries)
 
 categories <- read_csv("data/DataFest_2023_Data/categories.csv")
 
-glimpse(categories)
+# glimpse(categories)
 
 clients <- read_csv("data/DataFest_2023_Data/clients.csv")
 
-glimpse(clients)
+# glimpse(clients)
 
 questionposts <- read_csv("data/DataFest_2023_Data/questionposts.csv")
 
-glimpse(questionposts)
+# glimpse(questionposts)
 
 questions <- read_csv("data/DataFest_2023_Data/questions.csv")
 
-glimpse(questions)
+# glimpse(questions)
 
 statesites <- read_csv("data/DataFest_2023_Data/statesites.csv")
 
-glimpse(statesites)
+# glimpse(statesites)
 
 subcategories <- read_csv("data/DataFest_2023_Data/subcategories.csv")
 
-glimpse(subcategories)
+# glimpse(subcategories)
+```
+
+Determines list of states with full data since 2020-01-01
+
+```{r}
+relevant_states <-
+  questions %>% 
+  group_by(StateAbbr) %>% 
+  summarize(start = min(AskedOnUtc)) %>% 
+  filter(start < "2020-01-01 00:00:00") %>%
+  pull(StateAbbr)
 ```
