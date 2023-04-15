@@ -154,7 +154,7 @@ questions%>%
   # ) %>%  
   ggplot() +
   geom_histogram(aes(x = AskedOnUtc, alpha = 0.2), bins = 72) +
-  geom_histogram(data = . %>% filter(TakenByAttorneyUno == "NULL"), aes(x = AskedOnUtc, fill = StateAbbr), bins = 72) +
+  geom_histogram(data = . %>% filter(TakenByAttorneyUno != "NULL"), aes(x = AskedOnUtc, fill = StateAbbr), bins = 72) +
   facet_wrap(facets =  vars(StateAbbr))
 ```
 
@@ -163,15 +163,32 @@ questions%>%
   filter(
     #StateAbbr== c('TX', 'FL','GA','AZ','IN','CA'),
     # TakenByAttorneyUno == "NULL",
-    AskedOnUtc > '2020-01-01 12:00:00.000
+    AskedOnUtc > '2020-01-01 00:00:00.000
 '
     ) %>%
   # mutate(
   #   is_null = (TakenByAttorneyUno == "NULL"),
   # ) %>%  
   ggplot() +
-  geom_histogram(aes(x = AskedOnUtc, alpha = 0.2), bins = 72) +
-  geom_histogram(data = . %>% filter(TakenByAttorneyUno == "NULL"), aes(x = AskedOnUtc, fill = StateAbbr), bins = 72) +
+  geom_histogram(aes(x = AskedOnUtc, alpha = 0.2), bins = 24) +
+  geom_histogram(data = . %>% filter(TakenByAttorneyUno != "NULL"), aes(x = AskedOnUtc, fill = StateAbbr), bins = 24) +
+  facet_wrap(facets =  vars(StateAbbr)) 
+```
+
+```{r}
+questions%>% 
+  filter(
+    StateAbbr== c('TN', 'WI', 'FL', 'NC', 'MO', 'VA', 'NY', 'SC', 'IL', 'MA', 'IN', 'TX', 'OK', 'AZ', 'GA'),
+    # TakenByAttorneyUno == "NULL",
+    AskedOnUtc > '2020-01-01 00:00:00.000
+'
+    ) %>%
+  # mutate(
+  #   is_null = (TakenByAttorneyUno == "NULL"),
+  # ) %>%  
+  ggplot() +
+  geom_histogram(aes(x = AskedOnUtc, alpha = 0.2), bins = 24) +
+  geom_histogram(data = . %>% filter(TakenByAttorneyUno != "NULL"), aes(x = AskedOnUtc, fill = StateAbbr), bins = 24) +
   facet_wrap(facets =  vars(StateAbbr)) 
 ```
 
@@ -223,7 +240,7 @@ questions%>%
  
   ggplot() +
   geom_histogram(aes(x = AskedOnUtc, alpha = 0.2), bins = 72) +
-  geom_histogram(data = . %>% filter(TakenByAttorneyUno == "NULL"), aes(x = AskedOnUtc, fill = StateAbbr), bins = 72)  +
+  geom_histogram(data = . %>% filter(TakenByAttorneyUno != "NULL"), aes(x = AskedOnUtc, fill = StateAbbr), bins = 72)  +
   # geom_point(data = ~ byDayattorneytime %>% filter(StateAbbr == c('TX', 'FL')), aes(
   #   x = EnteredOnUtc,
   #   y = Hours
@@ -240,7 +257,7 @@ questions%>%
  
   ggplot() +
   geom_histogram(aes(x = AskedOnUtc, alpha = 0.2), bins = 72) +
-  geom_histogram(data = . %>% filter(TakenByAttorneyUno == "NULL"), aes(x = AskedOnUtc, fill = StateAbbr), bins = 72)  +
+  geom_histogram(data = . %>% filter(TakenByAttorneyUno != "NULL"), aes(x = AskedOnUtc, fill = StateAbbr), bins = 72)  +
   # geom_point(data = ~ byDayattorneytime %>% filter(StateAbbr == c('TX', 'FL')), aes(
   #   x = EnteredOnUtc,
   #   y = Hours
@@ -250,15 +267,12 @@ questions%>%
 
 ```{r}
 
-attorneytimeentries %>%
-  filter(StateAbbr == c('TX', 'FL','IN','GA','IL'), 
-         EnteredOnUtc > '2020-01-01 12:00:00.000') %>%
-  group_by(StateAbbr) %>% 
-  unique('AttorneyUno')
-  #summarise(n = n())
-  #separate(EnteredOnUtc, into = "EnteredOnUtc", sep = 7, extra = "drop") %>% 
-  #separate(EnteredOnUtc, into = "EnteredOnUtc", sep = " ", extra = "drop") %>% 
-  # group_by(AttorneyUno) %>%
-  # summarize(Hours = sum(Hours)) %>% 
-  # ungroup()
+attorneys_data %>%
+  filter(
+    CreatedUtc > "2020-01-01 00:00:00",
+    StateAbbr %in% states_over_2400
+  ) %>% 
+  ggplot(aes(StateAbbr)) +
+  geom_bar()
+  
 ```
