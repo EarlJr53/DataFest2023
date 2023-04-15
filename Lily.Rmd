@@ -31,6 +31,8 @@ questions <- read_csv("data/DataFest_2023_Data/questions.csv")
 state_sites <- read_csv("data/DataFest_2023_Data/statesites.csv")
 
 subcategories <- read_csv("data/DataFest_2023_Data/subcategories.csv")
+
+reporting_policy <- read_csv("data/reporting_policy.csv")
 ```
 
 I'm interested in the overall demographics of the clients, and also how that correlates with the type of questions that are being asked
@@ -450,10 +452,60 @@ total %>%
 
 our_15_states <- c("TN", "WI", "FL", "NC", "MO", "VA", "NY", "SC", "IL", "MA", "IN", "TX", "OK", "AZ", "GA")
 
-attorneys_data %>%
+active_attorneys <- attorneys_data %>%
   filter(
     CreatedUtc > "2020-01-01 00:00:00",
     StateAbbr %in% our_15_states
   ) %>%
   count(StateAbbr)
+active_attorneys
+```
+
+Using the dataset we curated, make a map plot based on whether pro bono is mandatory in each state
+
+```{r}
+df_responses <-
+  questions %>% 
+  filter(StateAbbr %in% relevant_states) %>%
+  group_by(StateAbbr) %>% 
+  mutate(
+    response_received = 1 * (TakenByAttorneyUno != "NULL")
+  ) %>% 
+  count(response_received) %>%
+  pivot_wider(
+    names_from = "response_received",
+    names_prefix = "response_",
+    values_from = "n"
+  ) %>%
+  rename(
+    responses = response_1,
+    nonresponses = response_0
+  ) %>% 
+  mutate(
+    total_questions = nonresponses + responses,
+    response_rate = responses / total_questions
+  ) %>% 
+  left_join(reporting_policy, by = c("StateAbbr" = "State"))
+
+df_responses
+```
+
+Now plot using df_responses
+
+```{r}
+plot_usmap(include = our_15_states, data = rename(df_responses, state = "StateAbbr"), values = "Reporting") +
+  scale_fill_discrete() +
+  labs(title = "Pro bono policies for the 15 states") +
+  theme(legend.position = "top")
+```
+
+Using the dataset we curated, make a map plot based on how many active attorneys there are in each of the 15 states
+
+```{r}
+plot_usmap(include = our_15_states, data = rename(active_attorneys, state = "StateAbbr"), values = "n") +
+  scale_fill_continuous(
+    low = "white", high = "red", name = "#active attorneys"
+  ) +
+  labs(title = "Number of active attorneys for the 15 relevant states") +
+  theme(legend.position = "bottom")
 ```
