@@ -83,8 +83,6 @@ questions %>%
   count(StateAbbr) %>%
   arrange(desc(n))
 
-questions %>%
-  
 ```
 
 ```{r}

@@ -33,7 +33,7 @@ subcategories <- read_csv("data/DataFest_2023_Data/statesites.csv")
 ```
 ```{r}
 questions%>% 
-  filter(AskedOnUtc > '2020-01-01 12:00:00.000') %>% 
+  filter(AskedOnUtc > '2020-01-01 00:00:00.000') %>% 
   group_by(StateAbbr) %>% 
   count() %>% 
   arrange(desc(n))
@@ -64,7 +64,7 @@ num_null <-
 #     select(is_null, everything())
 
 questions %>%
-  filter(AskedOnUtc > '2020-01-01 12:00:00.000') %>% 
+  filter(AskedOnUtc > '2020-01-01 00:00:00.000') %>% 
   group_by(StateAbbr) %>%
   mutate(
     is_null = 1 * (TakenByAttorneyUno == "NULL"),
@@ -112,5 +112,11 @@ relevant_states
 reporting_data <- read_csv("data/reporting_policy.csv")
 ```
 ```{r}
-reporting_data
+states_over_2400 <-
+  questions %>%
+  group_by(StateAbbr) %>%
+  filter(AskedOnUtc >= "2020-01-01 00:00:00") %>% 
+  count(StateAbbr) %>%
+  filter(n >= 2400) %>%
+  pull(StateAbbr)
 ```
