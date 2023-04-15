@@ -121,13 +121,12 @@ states_and_fips
 ```
 
 ```{r}
-# combine zip and fips
+# test that combining zip and fips works
 questions %>%
   left_join(select(clients, -Id), by = c("StateAbbr", "AskedByClientUno" = "ClientUno")) %>%
   group_by(County, StateAbbr) %>%
   left_join(states_and_fips, by = c("County" = "county", "StateAbbr" = "state")) %>%
-  filter(County == "Calhoun", StateAbbr == "AL") %>%
-  select(County, StateAbbr, fips)
+  filter(County == "Calhoun", StateAbbr == "AL")
 ```
 
 ```{r}
@@ -182,23 +181,14 @@ plot_usmap(include = c("FL", "TX"), regions = "counties", data = questions_by_co
 ```
 
 ```{r}
-texas_closed_n <- questions %>%
-  separate(col = ClosedOnUtc, into = c("ClosedOnTX", "ignore1"), sep = -12) %>%
+texas_ignored <- questions %>%
+  filter(StateAbbr == "TX", TakenOnUtc == "NULL") %>%
+  separate(col = AskedOnUtc, into = c("Date", "ignore1"), sep = -12) %>%
   select(
-    StateAbbr,
-    # County,
-    ClosedOnTX,
-    -ignore1
+    Date, TakenOnUtc, -ignore1
   ) %>%
-  filter(StateAbbr == "TX") %>%
-  select(
-    -StateAbbr
-  ) %>%
-  count(ClosedOnTX) %>%
-  rename(
-    Date = "ClosedOnTX",
-    ClosedOnTX = "n"
-  )
+  count(Date)
+
 
 texas_asked_n <- questions %>%
   separate(col = AskedOnUtc, into = c("AskedOnTX", "ignore2"), sep = -12) %>%
@@ -219,23 +209,13 @@ texas_asked_n <- questions %>%
   )
 
 
-florida_closed_n <- questions %>%
-  separate(col = ClosedOnUtc, into = c("ClosedOnFL", "ignore1"), sep = -12) %>%
+florida_ignored <- questions %>%
+  filter(StateAbbr == "FL", TakenOnUtc == "NULL") %>%
+  separate(col = AskedOnUtc, into = c("Date", "ignore1"), sep = -12) %>%
   select(
-    StateAbbr,
-    # County,
-    ClosedOnFL,
-    -ignore1
+    Date, TakenOnUtc, -ignore1
   ) %>%
-  filter(StateAbbr == "FL") %>%
-  select(
-    -StateAbbr
-  ) %>%
-  count(ClosedOnFL) %>%
-  rename(
-    Date = "ClosedOnFL",
-    ClosedOnFL = "n"
-  )
+  count(Date)
 
 florida_asked_n <- questions %>%
   separate(col = AskedOnUtc, into = c("AskedOnFL", "ignore2"), sep = -12) %>%
@@ -256,38 +236,83 @@ florida_asked_n <- questions %>%
   )
 
 
-
-
-
-
-
-texas_proportions <- texas_closed_n %>%
-  left_join(texas_asked_n, by = "Date") %>%
-  drop_na() %>%
+texas_proportions <- texas_asked_n %>%
+  left_join(texas_ignored, by = "Date") %>%
+  rename(IgnoredTX = "n") %>%
+  replace(is.na(.), 0) %>%
   mutate(
-    propTX = ClosedOnTX / AskedOnTX,
-    #over_one = prop >= 1
-  )
-florida_proportions <- florida_closed_n %>%
-  left_join(florida_asked_n, by = "Date") %>%
-  drop_na() %>%
-  mutate(
-    propFL = ClosedOnFL / AskedOnFL,
-    #over_one = prop >= 1
+    propTX = IgnoredTX / AskedOnTX
   )
 
-texas_proportions %>%
-  left_join(florida_proportions, by = "Date") %>%
-  select(Date, propTX, propFL) %>%
-  rename(TX = "propTX", FL = "propFL") %>%
-  pivot_longer(
-    cols = c(TX, FL),
-    names_to = "state",
-    values_to = "proportion"
-  ) %>%
+florida_proportions <- florida_asked_n %>%
+  left_join(florida_ignored, by = "Date") %>%
+  rename(IgnoredFL = "n") %>%
+  replace(is.na(.), 0) %>%
+  mutate(
+    propFL = IgnoredFL / AskedOnFL
+  )
+
+combined_proportions <-
+  texas_proportions %>%
+    left_join(florida_proportions, by = "Date") %>%
+    select(Date, propTX, propFL) %>%
+    rename(TX = "propTX", FL = "propFL") %>%
+    pivot_longer(
+      cols = c(TX, FL),
+      names_to = "state",
+      values_to = "proportion"
+    )
+
+combined_proportions %>%
   ggplot() +
   geom_col(aes(x = Date, y = proportion, fill = state)) +
   facet_grid(~state) +
-  scale_x_discrete(breaks = c("2017-01", "2018-01", "2019-01", "2020-01", "2021-01"))
+  scale_x_discrete(breaks = c("2018-01", "2019-01", "2020-01", "2021-01")) +
+  ggtitle("Proportion of Asked but Unanswered Questions for FL and TX") +
+  theme(legend.position = "none")
 
 ```
+
+Interesting points:
+
+-   late 2018 was a huge spike for both
+
+-   both were at a low in beginning of 2020 and have been increasing ever since
+
+```{r}
+# Need to connect the taken on and asked on values for every individual question raised. and then 
+
+ignored_TX <- questions %>%
+  filter(StateAbbr == "TX", TakenOnUtc == "NULL") %>%
+  separate(col = AskedOnUtc, into = c("Date", "ignore1"), sep = -12) %>%
+  select(
+    Date, TakenOnUtc, -ignore1
+  ) %>%
+  count(Date)
+ignored_TX
+
+# questions %>%
+#   # separate(col = ClosedOnUtc, into = c("TakenTX", "ignore1"), sep = -12) %>%
+#   select(
+#     StateAbbr,
+#     # County,
+#     TakenByAttorneyUno,
+#     
+#     # -ignore1
+#   ) %>%
+#   filter(StateAbbr == "TX") %>%
+#   select(
+#     -StateAbbr
+#   ) %>%
+#   count(TakenByAttorneyUno) %>%
+#   rename(
+#     Date = "TakenByAttorneyUno",
+#     TakenTX = "n"
+#   )
+```
+
+September 2017
+
+July 2018
+
+april 2019
