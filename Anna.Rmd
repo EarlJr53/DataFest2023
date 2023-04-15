@@ -10,38 +10,25 @@ library(ggplot2)
 ```
 
 ```{r}
-# Glimpse data
+  # data on voleteer atorneys
 attorneys_data <- read_csv("data/DataFest_2023_Data/attorneys.csv")
-
-#glimpse(attorneys_data)
-
+  # time sheet data 
 attorneytimeentries <- read_csv("data/DataFest_2023_Data/attorneytimeentries.csv")
-
-#glimpse(attorneytimeentries)
-
-categories <- read_csv("data/DataFest_2023_Data/categories.csv")
-
-#glimpse(categories)
-
+  # client 
 clients <- read_csv("data/DataFest_2023_Data/clients.csv")
-
-#glimpse(clients)
 
 questionposts <- read_csv("data/DataFest_2023_Data/questionposts.csv")
 
-#glimpse(questionposts)
-
 questions <- read_csv("data/DataFest_2023_Data/questions.csv")
 
-#glimpse(questions)
+##
 
 statesites <- read_csv("data/DataFest_2023_Data/statesites.csv")
 
-#glimpse(statesites)
-
+  # Legal Services Corporation universal catagories for all states
+categories <- read_csv("data/DataFest_2023_Data/categories.csv")
+  # subcatagories spesific to states
 subcategories <- read_csv("data/DataFest_2023_Data/statesites.csv")
-
-#glimpse(subcategories)
 ```
 
 ```{r}
@@ -75,6 +62,8 @@ attorneys_data %>%
   count() %>% 
   arrange(desc(n))
 ```
+
+Explore state income cut off qualifications
 
 ```{r}
 statesites %>% 
