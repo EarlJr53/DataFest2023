@@ -86,3 +86,15 @@ Plot by reporting policy
 ```{r}
 
 ```
+
+Find the number of active attorneys in our 15 relevant states
+
+```{r}
+active_attorneys <- attorneys_data %>%
+  filter(
+    CreatedUtc > "2020-01-01 00:00:00",
+    StateAbbr %in% states_over_2400
+  ) %>%
+  count(StateAbbr)
+active_attorneys
+```
