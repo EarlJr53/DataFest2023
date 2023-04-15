@@ -1,0 +1,55 @@
+---
+title: "data"
+output: html_document
+date: "2023-04-14"
+---
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
+```{r}
+# Glimpse data
+attorneys_data <- read_csv("data/DataFest_2023_Data/attorneys.csv")
+
+glimpse(attorneys_data)
+
+attorneytimeentries <- read_csv("data/DataFest_2023_Data/attorneytimeentries.csv")
+
+glimpse(attorneytimeentries)
+
+categories <- read_csv("data/DataFest_2023_Data/categories.csv")
+
+glimpse(categories)
+
+clients <- read_csv("data/DataFest_2023_Data/clients.csv")
+
+glimpse(clients)
+
+questionposts <- read_csv("data/DataFest_2023_Data/questionposts.csv")
+
+glimpse(questionposts)
+
+questions <- read_csv("data/DataFest_2023_Data/questions.csv")
+
+glimpse(questions)
+
+statesites <- read_csv("data/DataFest_2023_Data/statesites.csv")
+
+glimpse(statesites)
+
+subcategories <- read_csv("data/DataFest_2023_Data/statesites.csv")
+
+glimpse(subcategories)
+
+
+
+```
+
+```{r}
+questions%>% 
+  group_by(StateAbbr) %>% 
+  count() %>% 
+  arrange(desc(n))
+```
