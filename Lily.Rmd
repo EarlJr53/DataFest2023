@@ -182,56 +182,112 @@ plot_usmap(include = c("FL", "TX"), regions = "counties", data = questions_by_co
 ```
 
 ```{r}
-num_noresponse <- 
-  questions %>%
-  filter(TakenByAttorneyUno == "NULL") %>%
-  nrow()
-
-closed_n <- questions %>%
-  separate(col = ClosedOnUtc, into = c("ClosedOn", "ignore1"), sep = -12) %>%
+texas_closed_n <- questions %>%
+  separate(col = ClosedOnUtc, into = c("ClosedOnTX", "ignore1"), sep = -12) %>%
   select(
     StateAbbr,
     # County,
-    ClosedOn,
+    ClosedOnTX,
     -ignore1
   ) %>%
   filter(StateAbbr == "TX") %>%
   select(
     -StateAbbr
   ) %>%
-  count(ClosedOn) %>%
+  count(ClosedOnTX) %>%
   rename(
-    Date = "ClosedOn",
-    ClosedOn = "n"
+    Date = "ClosedOnTX",
+    ClosedOnTX = "n"
   )
 
-asked_n <- questions %>%
-  separate(col = AskedOnUtc, into = c("AskedOn", "ignore2"), sep = -12) %>%
+texas_asked_n <- questions %>%
+  separate(col = AskedOnUtc, into = c("AskedOnTX", "ignore2"), sep = -12) %>%
   select(
     StateAbbr,
     # County,
-    AskedOn,
+    AskedOnTX,
     -ignore2
   ) %>%
   filter(StateAbbr == "TX") %>%
   select(
     -StateAbbr
   ) %>%
-  count(AskedOn) %>%
+  count(AskedOnTX) %>%
   rename(
-    Date = "AskedOn",
-    AskedOn = "n"
+    Date = "AskedOnTX",
+    AskedOnTX = "n"
   )
 
-closed_n %>%
-  left_join(asked_n, by = "Date") %>%
+
+florida_closed_n <- questions %>%
+  separate(col = ClosedOnUtc, into = c("ClosedOnFL", "ignore1"), sep = -12) %>%
+  select(
+    StateAbbr,
+    # County,
+    ClosedOnFL,
+    -ignore1
+  ) %>%
+  filter(StateAbbr == "FL") %>%
+  select(
+    -StateAbbr
+  ) %>%
+  count(ClosedOnFL) %>%
+  rename(
+    Date = "ClosedOnFL",
+    ClosedOnFL = "n"
+  )
+
+florida_asked_n <- questions %>%
+  separate(col = AskedOnUtc, into = c("AskedOnFL", "ignore2"), sep = -12) %>%
+  select(
+    StateAbbr,
+    # County,
+    AskedOnFL,
+    -ignore2
+  ) %>%
+  filter(StateAbbr == "FL") %>%
+  select(
+    -StateAbbr
+  ) %>%
+  count(AskedOnFL) %>%
+  rename(
+    Date = "AskedOnFL",
+    AskedOnFL = "n"
+  )
+
+
+
+
+
+
+
+texas_proportions <- texas_closed_n %>%
+  left_join(texas_asked_n, by = "Date") %>%
   drop_na() %>%
   mutate(
-    prop = ClosedOn / AskedOn
+    propTX = ClosedOnTX / AskedOnTX,
+    #over_one = prop >= 1
+  )
+florida_proportions <- florida_closed_n %>%
+  left_join(florida_asked_n, by = "Date") %>%
+  drop_na() %>%
+  mutate(
+    propFL = ClosedOnFL / AskedOnFL,
+    #over_one = prop >= 1
+  )
+
+texas_proportions %>%
+  left_join(florida_proportions, by = "Date") %>%
+  select(Date, propTX, propFL) %>%
+  rename(TX = "propTX", FL = "propFL") %>%
+  pivot_longer(
+    cols = c(TX, FL),
+    names_to = "state",
+    values_to = "proportion"
   ) %>%
-  # filter(ClosedOn > AskedOn)
   ggplot() +
-  geom_col(aes(x = Date, y = prop)) +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+  geom_col(aes(x = Date, y = proportion, fill = state)) +
+  facet_grid(~state) +
+  scale_x_discrete(breaks = c("2017-01", "2018-01", "2019-01", "2020-01", "2021-01"))
 
 ```
