@@ -49,7 +49,17 @@ glimpse(subcategories)
 
 ```{r}
 questions%>% 
-  group_by(StateAbbr) %>% 
-  count() %>% 
+  filter(StateAbbr=='MA') %>% 
+  count(Subcategory) %>% 
   arrange(desc(n))
+```
+```{r}
+num_null <- 
+  questions %>% 
+    filter(TakenByAttorneyUno == "NULL") %>% 
+    nrow()
+
+questions %>% 
+    mutate(is_null = num_null/nrow()) %>% 
+    select(is_null, everything())
 ```
