@@ -46,11 +46,25 @@ glimpse(subcategories)
 
 
 ```
+```{r}
+questions%>% 
+  filter(AskedOnUtc > '2020-01-01 12:00:00.000') %>% 
+  group_by(StateAbbr) %>% 
+  count() %>% 
+  arrange(desc(n))
+```
+```{r}
+attorneytimeentries%>% 
+  group_by(StateAbbr) %>% 
+  count() %>% 
+  arrange(desc(n))
+```
 
 ```{r}
 questions%>% 
-  filter(StateAbbr=='MA') %>% 
-  count(Subcategory) %>% 
+  filter(StateAbbr=='FL') %>% 
+  group_by(Subcategory) %>% 
+  count() %>% 
   arrange(desc(n))
 ```
 
@@ -65,6 +79,7 @@ num_null <-
 #     select(is_null, everything())
 
 questions %>%
+  filter(AskedOnUtc > '2020-01-01 12:00:00.000') %>% 
   group_by(StateAbbr) %>%
   mutate(
     is_null = 1 * (TakenByAttorneyUno == "NULL"),
@@ -79,4 +94,40 @@ questions %>%
     null_percent = null1 / (null0 + null1)
   ) %>% 
   arrange(desc(null_percent))
+```
+```{r}
+  questions %>% 
+    group_by(Category) %>%
+  mutate(
+    is_null = 1 * (TakenByAttorneyUno == "NULL"),
+  ) %>%
+  count(is_null) %>%
+  pivot_wider(
+    names_from = "is_null",
+    names_prefix = "null",
+    values_from = "n"
+  ) %>%
+  mutate(
+    null_percent = null1 / (null0 + null1)
+  ) %>% 
+  select(null_percent, everything())
+```
+
+```{r}
+questions %>%
+   group_by(StateAbbr) %>%
+  mutate(
+    is_null = 1 * (TakenByAttorneyUno == "NULL"),
+  ) %>%
+  count(is_null) %>%
+  pivot_wider(
+    names_from = "is_null",
+    names_prefix = "null",
+    values_from = "n"
+  ) %>%
+  mutate(
+    null_percent = null1 / (null0 + null1)
+  ) %>% 
+  arrange(desc(null_percent))
+
 ```
