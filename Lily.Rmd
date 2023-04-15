@@ -170,23 +170,25 @@ plot_usmap(regions = "counties", data = questions_by_county, values = "null_perc
 
 ```
 
-### Zooming into Florida and Texas
+### Zooming into our 5 case study states (Florida, Texas, Illinois, Indiana, Georgia)
 
 ```{r}
-plot_usmap(include = c("FL", "TX"), regions = "counties", data = questions_by_county, values = "null_percent", color = NA) +
+plot_usmap(include = c("FL", "TX", "IL", "IN", "GA"), regions = "counties", data = questions_by_county, values = "null_percent", color = NA) +
   scale_fill_continuous(
     low = "white", high = "red", name = "Nonresponse rate", label = scales::comma
   ) +
-  labs(title = "Texas vs Florida Nonresponse rates") +
+  labs(title = "Nonresponse rates for 10 case study states") +
   theme(legend.position = "bottom")
-  
 ```
 
-### Comparing Florida and Texas proportions of nonresponse rates over time
+### Comparing Florida and Texas proportions of non-response rates over time
 
 METHINKS THIS IS A VERY USEFUL PLOT!!!!!!!
 
+Run the cell below to store all the data. theres probably a more efificent way to do this than the 200000 lines of code i have but it is what it is
+
 ```{r}
+# texas
 texas_ignored <- questions %>%
   filter(StateAbbr == "TX", TakenOnUtc == "NULL") %>%
   separate(col = AskedOnUtc, into = c("Date", "ignore1"), sep = -12) %>%
@@ -200,7 +202,6 @@ texas_asked_n <- questions %>%
   separate(col = AskedOnUtc, into = c("AskedOnTX", "ignore2"), sep = -12) %>%
   select(
     StateAbbr,
-    # County,
     AskedOnTX,
     -ignore2
   ) %>%
@@ -215,6 +216,7 @@ texas_asked_n <- questions %>%
   )
 
 
+# florida
 florida_ignored <- questions %>%
   filter(StateAbbr == "FL", TakenOnUtc == "NULL") %>%
   separate(col = AskedOnUtc, into = c("Date", "ignore1"), sep = -12) %>%
@@ -227,7 +229,6 @@ florida_asked_n <- questions %>%
   separate(col = AskedOnUtc, into = c("AskedOnFL", "ignore2"), sep = -12) %>%
   select(
     StateAbbr,
-    # County,
     AskedOnFL,
     -ignore2
   ) %>%
@@ -240,6 +241,86 @@ florida_asked_n <- questions %>%
     Date = "AskedOnFL",
     AskedOnFL = "n"
   )
+
+
+# illinois
+illinois_ignored <- questions %>%
+  filter(StateAbbr == "IL", TakenOnUtc == "NULL") %>%
+  separate(col = AskedOnUtc, into = c("Date", "ignore1"), sep = -12) %>%
+  select(
+    Date, TakenOnUtc, -ignore1
+  ) %>%
+  count(Date)
+
+illinois_asked_n <- questions %>%
+  separate(col = AskedOnUtc, into = c("AskedOnIL", "ignore2"), sep = -12) %>%
+  select(
+    StateAbbr,
+    AskedOnIL,
+    -ignore2
+  ) %>%
+  filter(StateAbbr == "IL") %>%
+  select(
+    -StateAbbr
+  ) %>%
+  count(AskedOnIL) %>%
+  rename(
+    Date = "AskedOnIL",
+    AskedOnIL = "n"
+  )
+
+# indiana
+indiana_ignored <- questions %>%
+  filter(StateAbbr == "IN", TakenOnUtc == "NULL") %>%
+  separate(col = AskedOnUtc, into = c("Date", "ignore1"), sep = -12) %>%
+  select(
+    Date, TakenOnUtc, -ignore1
+  ) %>%
+  count(Date)
+
+indiana_asked_n <- questions %>%
+  separate(col = AskedOnUtc, into = c("AskedOnIN", "ignore2"), sep = -12) %>%
+  select(
+    StateAbbr,
+    AskedOnIN,
+    -ignore2
+  ) %>%
+  filter(StateAbbr == "IN") %>%
+  select(
+    -StateAbbr
+  ) %>%
+  count(AskedOnIN) %>%
+  rename(
+    Date = "AskedOnIN",
+    AskedOnIN = "n"
+  )
+
+# georgia
+georgia_ignored <- questions %>%
+  filter(StateAbbr == "GA", TakenOnUtc == "NULL") %>%
+  separate(col = AskedOnUtc, into = c("Date", "ignore1"), sep = -12) %>%
+  select(
+    Date, TakenOnUtc, -ignore1
+  ) %>%
+  count(Date)
+
+georgia_asked_n <- questions %>%
+  separate(col = AskedOnUtc, into = c("AskedOnGA", "ignore2"), sep = -12) %>%
+  select(
+    StateAbbr,
+    AskedOnGA,
+    -ignore2
+  ) %>%
+  filter(StateAbbr == "GA") %>%
+  select(
+    -StateAbbr
+  ) %>%
+  count(AskedOnGA) %>%
+  rename(
+    Date = "AskedOnGA",
+    AskedOnGA = "n"
+  )
+
 
 
 texas_proportions <- texas_asked_n %>%
@@ -258,27 +339,56 @@ florida_proportions <- florida_asked_n %>%
     propFL = IgnoredFL / AskedOnFL
   )
 
+illinois_proportions <- illinois_asked_n %>%
+  left_join(illinois_ignored, by = "Date") %>%
+  rename(IgnoredIL = "n") %>%
+  replace(is.na(.), 0) %>%
+  mutate(
+    propIL = IgnoredIL / AskedOnIL
+  )
+
+indiana_proportions <- indiana_asked_n %>%
+  left_join(indiana_ignored, by = "Date") %>%
+  rename(IgnoredIN = "n") %>%
+  replace(is.na(.), 0) %>%
+  mutate(
+    propIN = IgnoredIN / AskedOnIN
+  )
+
+georgia_proportions <- georgia_asked_n %>%
+  left_join(georgia_ignored, by = "Date") %>%
+  rename(IgnoredGA = "n") %>%
+  replace(is.na(.), 0) %>%
+  mutate(
+    propGA = IgnoredGA / AskedOnGA
+  )
+
+
 combined_proportions <-
   texas_proportions %>%
   left_join(florida_proportions, by = "Date") %>%
-  select(Date, propTX, propFL) %>%
-  rename(TX = "propTX", FL = "propFL") %>%
+  left_join(illinois_proportions, by = "Date") %>%
+  left_join(indiana_proportions, by = "Date") %>%
+  left_join(georgia_proportions, by = "Date") %>%
+  select(Date, propTX, propFL, propIL, propIN, propGA) %>%
+  rename(TX = "propTX", FL = "propFL", IL = "propIL", IN = "propIN", GA = "propGA") %>%
   pivot_longer(
-    cols = c(TX, FL),
+    cols = c(TX, FL, IL, IN, GA),
     names_to = "state",
     values_to = "proportion"
   ) %>%
   mutate(
     below_threshold = proportion <= 0.1
   )
+```
 
+```{r}
 combined_proportions %>%
   ggplot() +
   geom_col(aes(x = Date, y = proportion, fill = below_threshold)) +
-  facet_grid(~state) +
+  facet_wrap(~state, ncol = 2) +
   scale_x_discrete(breaks = c("2018-01", "2019-01", "2020-01", "2021-01")) +
-  ggtitle("Proportion of Asked but Unanswered Questions for FL and TX")
-
+  ggtitle("Proportion of Asked but Unanswered Questions for 5 states")
 ```
 
 Interesting points:
@@ -288,3 +398,26 @@ Interesting points:
 -   both were at a low in beginning of 2020 and have been increasing ever since
 
     -   check min value for texas (should be in 2020)
+
+TODO: make another plot where the timescale it jan 2020 - jan 2022
+
+```{r}
+total <- questions %>%
+  separate(col = AskedOnUtc, into = c("Year", "Month", "ignore"), sep = "-", remove = FALSE) %>%
+  select(Year, Month, StateAbbr, AskedOnUtc, TakenOnUtc) %>%
+  filter(Year >= "2020") %>%
+  count(StateAbbr) %>%
+  rename(total_amt = "n")
+
+total_null <- questions %>%
+  separate(col = AskedOnUtc, into = c("Year", "Month", "ignore"), sep = "-", remove = FALSE) %>%
+  select(Year, Month, StateAbbr, AskedOnUtc, TakenOnUtc) %>%
+  filter(Year >= "2020", TakenOnUtc == "NULL") %>%
+  count(StateAbbr) %>%
+  rename(null_amt = "n")
+
+total %>%
+  left_join(total_null, by = "StateAbbr") %>%
+  mutate(prop = null_amt / total_amt) %>%
+  arrange(prop)
+```
