@@ -161,7 +161,7 @@ questions_by_county
 ```{r}
 plot_usmap(regions = "counties", data = questions_by_county, values = "null_percent", color = "gray") +
   scale_fill_continuous(
-    low = "white", high = "red", name = "Null Percentage", label = scales::comma
+    low = "white", high = "red", name = "Nonresponse rate", label = scales::comma
   ) +
   labs(
     title = "Noresponse Rates by US Counties",
@@ -169,4 +169,18 @@ plot_usmap(regions = "counties", data = questions_by_county, values = "null_perc
   ) +
   theme(legend.position = "right")
 
+```
+
+florida vs texas
+
+```{r}
+# florida
+
+plot_usmap(include = c("FL", "TX"), regions = "counties", data = questions_by_county, values = "null_percent", color = "gray") +
+  scale_fill_continuous(
+    low = "white", high = "red", name = "Nonresponse rate", label = scales::comma
+  ) +
+  labs(title = "Texas vs Florida Nonresponse rates") +
+  theme(legend.position = "bottom")
+  
 ```
