@@ -174,3 +174,15 @@ questions%>%
   geom_histogram(data = . %>% filter(TakenByAttorneyUno == "NULL"), aes(x = AskedOnUtc, fill = StateAbbr), bins = 72) +
   facet_wrap(facets =  vars(StateAbbr)) 
 ```
+
+```{r}
+attorneytimeentries %>%
+  separate(EnteredOnUtc, into = "EnteredOnUtc", sep = " ", extra = "drop") %>% 
+  group_by(EnteredOnUtc) %>%
+  summarize(Hours = sum(Hours)) %>% 
+  ggplot() +
+  geom_col(aes(
+    x = EnteredOnUtc,
+    y = Hours
+  ))
+```

@@ -7,6 +7,8 @@ date: "2023-04-14"
 ```{r}
 library(tidyverse)
 library(ggplot2)
+library(usmap)
+library(tidyr)
 ```
 
 Let's glimpse the datasets to get an overview of what variables we'll be working with.
@@ -102,11 +104,14 @@ questions %>%
     null_percent = null1 / (null0 + null1)
   ) %>%
   # arrange(desc(null_percent)) %>%
-  rename(state = StateAbbr) %>%
-  plot_usmap(regions = "states", values = "null_percent") + 
+  # rename(state = StateAbbr) %>%
+  mutate(
+    fips = fips(state = StateAbbr, county = County)
+  ) %>% 
+  plot_usmap(regions = "counties", values = "null_percent", include = c("TX", "FL")) + 
   # labs(title = "US States",
   #      subtitle = "This is a blank map of the counties of the United States.") + 
-  scale_fill_continuous()
+  scale_fill_continuous(low = "white", high = "red")
   # theme(panel.background = element_rect(color = "black", fill = "lightblue"))
 ```
 
@@ -125,4 +130,30 @@ questions %>%
     fill = is_null,
     group = is_null
   ), position = "dodge")
+```
+
+```{r}
+questions %>%
+  filter(StateAbbr %in% c("FL")) %>%
+  # filter(!(Category %in% c("Education", "Juvenile", "Income Maintenance"))) %>%
+  mutate(
+    is_null = 1 * (TakenByAttorneyUno == "NULL"),
+  ) %>% 
+  # group_by(Category) %>%
+  ggplot() +
+  geom_freqpoly(aes(AskedOnUtc, color = as.factor(is_null))) +
+  facet_wrap(facets = vars(Subcategory))
+  # facet_grid(cols = vars(is_null), rows = vars(Category), scales = "free")
+
+questions %>%
+  filter(StateAbbr %in% c("TX")) %>%
+  # filter(!(Category %in% c("Education", "Juvenile", "Income Maintenance"))) %>%
+  mutate(
+    is_null = 1 * (TakenByAttorneyUno == "NULL"),
+  ) %>% 
+  # group_by(Category) %>%
+  ggplot() +
+  geom_freqpoly(aes(AskedOnUtc, color = as.factor(is_null))) +
+  facet_wrap(facets = vars(Subcategory))
+  # facet_grid(cols = vars(is_null), rows = vars(Category), scales = "free")
 ```
