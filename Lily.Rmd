@@ -399,13 +399,13 @@ Interesting points:
 
     -   check min value for texas (should be in 2020)
 
-TODO: make another plot where the timescale it jan 2020 - jan 2022
+Now we will check which states are relevant, meaning they started the program before Jan 2020, and have \>3000 responses in the 2 year time range
 
 ```{r}
 total <- questions %>%
   separate(col = AskedOnUtc, into = c("Year", "Month", "ignore"), sep = "-", remove = FALSE) %>%
   select(Year, Month, StateAbbr, AskedOnUtc, TakenOnUtc) %>%
-  filter(Year >= "2020") %>%
+  filter(Year == "2020" | Year == "2021" | Year == "2022") %>%
   count(StateAbbr) %>%
   rename(total_amt = "n")
 
@@ -415,9 +415,33 @@ total_null <- questions %>%
   filter(Year >= "2020", TakenOnUtc == "NULL") %>%
   count(StateAbbr) %>%
   rename(null_amt = "n")
+```
+
+```{r}
+relevant_states <-
+  questions %>% 
+  group_by(StateAbbr) %>% 
+  summarize(start = min(AskedOnUtc)) %>% 
+  filter(start < "2020-01-01 00:00:00") %>%
+  pull(StateAbbr)
 
 total %>%
+  filter(
+    StateAbbr %in% relevant_states,
+    total_amt > 3000
+  ) %>%
+  left_join(total_null, by = "StateAbbr") %>%
+  mutate(prop = null_amt / total_amt) %>%
+  arrange(desc(prop))
+
+total %>%
+  filter(
+    StateAbbr %in% relevant_states,
+    total_amt > 3000
+  ) %>%
   left_join(total_null, by = "StateAbbr") %>%
   mutate(prop = null_amt / total_amt) %>%
   arrange(prop)
 ```
+
+combine reporting policy with clicks
