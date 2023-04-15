@@ -9,7 +9,7 @@ library(tidyverse)
 library(ggplot2)
 ```
 
-```{r}
+```{r include=FALSE}
   # data on voleteer atorneys
 attorneys_data <- read_csv("data/DataFest_2023_Data/attorneys.csv")
   # time sheet data 
@@ -80,8 +80,97 @@ statesites %>%
 ```
 
 ```{r}
-questions%>% 
+questions %>% 
   filter(StateAbbr=='TX', ) %>% 
   count(Subcategory) %>% 
   arrange(desc(n))
+
+subcategories %>% 
+  group_by(StateAbbr)
+```
+
+Create the mega data set!
+
+```{r}
+questions %>%
+  left_join(clients, by = c("AskedByClientUno" = "ClientUno", "StateAbbr")) %>%
+  group_by(StateAbbr) %>%
+  mutate(
+    is_null = 1 * (TakenByAttorneyUno == "NULL"),
+  ) %>%
+  count(is_null) %>%
+  pivot_wider(
+    names_from = "is_null",
+    names_prefix = "null",
+    values_from = "n"
+  ) %>%
+  mutate(
+    null_percent = null1 / (null0 + null1)
+  ) %>%
+  arrange(desc(null_percent))
+
+
+```
+
+```{r}
+questions%>% 
+  filter(
+    StateAbbr=='TX',
+    # TakenByAttorneyUno == "NULL"
+    ) %>%
+  # mutate(
+  #   is_null = (TakenByAttorneyUno == "NULL"),
+  # ) %>%  
+  ggplot() +
+  geom_histogram(aes(x = AskedOnUtc, alpha = 0.2), bins = 72) +
+  geom_histogram(data = . %>% filter(TakenByAttorneyUno == "NULL"), aes(x = AskedOnUtc, fill = StateAbbr), bins = 72)
+  
+
+```
+
+```{r}
+questions%>% 
+  filter(
+    StateAbbr=='FL',
+    # TakenByAttorneyUno == "NULL"
+    ) %>%
+  # mutate(
+  #   is_null = (TakenByAttorneyUno == "NULL"),
+  # ) %>%  
+  ggplot() +
+  geom_histogram(aes(x = AskedOnUtc, alpha = 0.2), bins = 72) +
+  geom_histogram(data = . %>% filter(TakenByAttorneyUno == "NULL"), aes(x = AskedOnUtc, fill = StateAbbr), bins = 72)
+  
+```
+
+```{r}
+questions%>% 
+  filter(
+    #StateAbbr== c('TX', 'FL','GA','AZ','IN','CA'),
+    # TakenByAttorneyUno == "NULL"
+    ) %>%
+  # mutate(
+  #   is_null = (TakenByAttorneyUno == "NULL"),
+  # ) %>%  
+  ggplot() +
+  geom_histogram(aes(x = AskedOnUtc, alpha = 0.2), bins = 72) +
+  geom_histogram(data = . %>% filter(TakenByAttorneyUno == "NULL"), aes(x = AskedOnUtc, fill = StateAbbr), bins = 72) +
+  facet_wrap(facets =  vars(StateAbbr))
+```
+
+```{r}
+questions%>% 
+  filter(
+    #StateAbbr== c('TX', 'FL','GA','AZ','IN','CA'),
+    # TakenByAttorneyUno == "NULL",
+    AskedOnUtc > '2020-01-01 12:00:00.000
+'
+    ) %>%
+  # mutate(
+  #   is_null = (TakenByAttorneyUno == "NULL"),
+  # ) %>%  
+  ggplot() +
+  geom_histogram(aes(x = AskedOnUtc, alpha = 0.2), bins = 72) +
+  geom_histogram(data = . %>% filter(TakenByAttorneyUno == "NULL"), aes(x = AskedOnUtc, fill = StateAbbr), bins = 72) +
+  facet_wrap(facets =  vars(StateAbbr)) 
 ```
