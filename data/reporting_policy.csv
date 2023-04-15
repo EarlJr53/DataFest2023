@@ -1,15 +1,15 @@
-﻿State,Reporting ,Year_Passed
-FL,Mandatory ,1993
+State,Reporting,Year_Passed
+FL,Mandatory,1993
 TX,Voluntary,2005
-IL,Mandatory ,2006
-IN,Mandatory ,2016
+IL,Mandatory,2006
+IN,Mandatory,2016
 GA,Voluntary,2000
-HI,Mandatory ,2007
-MD,Mandatory ,2002
-MS,Mandatory ,2005
-NV,Mandatory ,2006
-NM,Mandatory ,2008
-NY,Mandatory ,2013
+HI,Mandatory,2007
+MD,Mandatory,2002
+MS,Mandatory,2005
+NV,Mandatory,2006
+NM,Mandatory,2008
+NY,Mandatory,2013
 AZ,Voluntary,1994
 CT,Voluntary,2012
 KY,Voluntary,2005
@@ -49,27 +49,3 @@ VT,NULL,NULL
 WV,NULL,NULL
 WI,NULL,NULL
 WY,NULL,NULL
-,,
-,,
-,,
-,,
-,,
-,,
-,,
-,,
-,,
-,,
-,,
-,,
-,,
-,,
-,,
-,,
-,,
-,,
-,,
-,,
-,,
-,,
-,,
-,,
