@@ -145,10 +145,6 @@ questions_by_county <- questions %>%
   ) %>%
   mutate(
     null_percent = null1 / (null0 + null1)
-    # fips = fipscounty(county = counties)
-    # summarise(new = list(fips(state = first(state), county = county)))
-    # !state =
-      # state.name[match(StateAbbr, state.abb)]
   ) %>%
   drop_na() %>%
   left_join(states_and_fips, by = c("County" = "county", "StateAbbr" = "state")) %>%
@@ -183,4 +179,59 @@ plot_usmap(include = c("FL", "TX"), regions = "counties", data = questions_by_co
   labs(title = "Texas vs Florida Nonresponse rates") +
   theme(legend.position = "bottom")
   
+```
+
+```{r}
+num_noresponse <- 
+  questions %>%
+  filter(TakenByAttorneyUno == "NULL") %>%
+  nrow()
+
+closed_n <- questions %>%
+  separate(col = ClosedOnUtc, into = c("ClosedOn", "ignore1"), sep = -12) %>%
+  select(
+    StateAbbr,
+    # County,
+    ClosedOn,
+    -ignore1
+  ) %>%
+  filter(StateAbbr == "TX") %>%
+  select(
+    -StateAbbr
+  ) %>%
+  count(ClosedOn) %>%
+  rename(
+    Date = "ClosedOn",
+    ClosedOn = "n"
+  )
+
+asked_n <- questions %>%
+  separate(col = AskedOnUtc, into = c("AskedOn", "ignore2"), sep = -12) %>%
+  select(
+    StateAbbr,
+    # County,
+    AskedOn,
+    -ignore2
+  ) %>%
+  filter(StateAbbr == "TX") %>%
+  select(
+    -StateAbbr
+  ) %>%
+  count(AskedOn) %>%
+  rename(
+    Date = "AskedOn",
+    AskedOn = "n"
+  )
+
+closed_n %>%
+  left_join(asked_n, by = "Date") %>%
+  drop_na() %>%
+  mutate(
+    prop = ClosedOn / AskedOn
+  ) %>%
+  # filter(ClosedOn > AskedOn)
+  ggplot() +
+  geom_col(aes(x = Date, y = prop)) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
 ```
