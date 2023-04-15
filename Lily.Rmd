@@ -1,0 +1,78 @@
+---
+title: "Lily"
+output: html_document
+date: "2023-04-15"
+---
+
+This is Lily's markdown file
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+```
+
+```{r}
+attorneys <- read_csv("data/DataFest_2023_Data/attorneys.csv")
+
+attorneys_time_entries <- read_csv("data/DataFest_2023_Data/attorneytimeentries.csv")
+
+categories <- read_csv("data/DataFest_2023_Data/categories.csv")
+
+clients <- read_csv("data/DataFest_2023_Data/clients.csv")
+
+question_posts <- read_csv("data/DataFest_2023_Data/questionposts.csv")
+
+questions <- read_csv("data/DataFest_2023_Data/questions.csv")
+
+state_sites <- read_csv("data/DataFest_2023_Data/statesites.csv")
+
+subcategories <- read_csv("data/DataFest_2023_Data/subcategories.csv")
+```
+
+I'm interested in the overall demographics of the clients, and also how that correlates with the type of questions that are being asked
+
+The following focuses only on the gender. It is important to note I'm only selecting values with *one* gender value, so I'm filtering out responses from people who put down multiple genders
+
+```{r}
+clients %>%
+  count(Gender)
+
+combined <- questions %>%
+  drop_na(AskedByClientUno) %>%
+  right_join(clients, by = c('AskedByClientUno' = 'ClientUno'))
+
+combined
+
+gender_v_category <- combined %>%
+  select("Category", "Gender") %>%
+  group_by(Gender) %>%
+  mutate(
+    total_by_gender = n()
+  ) %>%
+  group_by(Category) %>%
+  mutate(
+    count = n(),
+    prop = count / total_by_gender
+  )
+
+gender_v_category
+
+# gender_v_category %>%
+#   filter(Gender == c("Female", "Male")) %>%
+#   ggplot() +
+#     geom_col(aes(x = Category, y = prop, fill = Gender), position = "dodge") +
+#     # geom_col(data = male_category, mapping = aes(Category, n), fill = "blue") +
+#     coord_flip()
+
+```
+
+I'm going to filter the questions by keywords, because there are a lot of NA categories. The ones i'm interested in are: \_\_\_\_\_\_
+
+```{r}
+
+```
+
+Other topics:
+
+-   Smth ab incorrectly categorized questions - how this relates to proportion of unanswered questions, which categories have more flaws and should be reworded
