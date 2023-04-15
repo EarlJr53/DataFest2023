@@ -276,3 +276,40 @@ attorneys_data %>%
   geom_bar()
   
 ```
+
+```{r}
+attorneytimeentries
+attorneytimeentries %>%
+  filter(
+    EnteredOnUtc > "2020-01-01 00:00:00",
+    StateAbbr %in% states_over_2400
+  ) %>% 
+  group_by(StateAbbr) %>% 
+  summarise(hours = sum(Hours)) %>% 
+  arrange(desc(hours))
+
+attorneytimeentries
+attorneytimeentries %>%
+  filter(
+    EnteredOnUtc > "2020-01-01 00:00:00",
+    StateAbbr %in% states_over_2400
+  ) %>% 
+  group_by(StateAbbr, AttorneyUno) %>% 
+  summarise(hours = sum(Hours), meanTime = mean(Hours)) %>% 
+  arrange(desc(hours))
+
+
+```
+
+```{r}
+attorneytimeentries
+attorneytimeentries %>%
+  filter(
+    EnteredOnUtc > "2020-01-01 00:00:00",
+    StateAbbr %in% states_over_2400
+  ) %>% 
+  group_by(StateAbbr,AttorneyUno) %>% 
+  summarise(numEntriesPerAterny = n())  %>% 
+  summarise(numAterny = n()) %>% 
+  arrange(desc(numAterny))
+```
