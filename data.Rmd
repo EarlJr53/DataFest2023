@@ -59,7 +59,7 @@ Tidy data, combine relevant states, reporting policy, and response rates.
 ```{r}
 df_responses <-
   questions %>% 
-  filter(StateAbbr %in% relevant_states) %>%
+  filter(StateAbbr %in% relevant_states, AskedOnUtc >= "2020-01-01 00:00:00") %>%
   group_by(StateAbbr) %>% 
   mutate(
     response_received = 1 * (TakenByAttorneyUno != "NULL")
@@ -73,16 +73,30 @@ df_responses <-
   rename(
     responses = response_1,
     nonresponses = response_0
-  ) %>% 
+  ) %>%
   mutate(
     total_questions = nonresponses + responses,
     response_rate = responses / total_questions
-  ) %>% 
+  ) %>%
   left_join(reporting_policy, by = c("StateAbbr" = "State"))
 ```
 
 Plot by reporting policy
 
 ```{r}
+# df_responses
+
+df_responses %>% 
+  # mutate_at(c('response_rate', 'StateAbbr'), as.factor) %>%
+  # mutate(StateAbbr = fct_reorder(StateAbbr, response_rate)) %>% 
+  ggplot() +
+  geom_col(aes(
+    x = fct_reorder(StateAbbr, response_rate),
+    y = response_rate,
+    fill = Reporting
+  )) +
+  # scale_fill_continuous(type = "viridis") +
+  ylim(0, 1)
+
 
 ```
