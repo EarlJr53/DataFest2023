@@ -53,13 +53,21 @@ questions%>%
   count(Subcategory) %>% 
   arrange(desc(n))
 ```
+
 ```{r}
 num_null <- 
   questions %>% 
     filter(TakenByAttorneyUno == "NULL") %>% 
     nrow()
 
-questions %>% 
-    mutate(is_null = num_null/nrow()) %>% 
-    select(is_null, everything())
+# questions %>% 
+#     mutate(is_null = num_null/nrow()) %>% 
+#     select(is_null, everything())
+
+questions %>%
+  group_by(StateAbbr) %>%
+  mutate(
+    is_null = 1 * (TakenByAttorneyUno == "NULL"),
+  ) %>%
+  count(is_null)
 ```
