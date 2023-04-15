@@ -153,8 +153,12 @@ questions_by_county <- questions %>%
 questions_by_county
 ```
 
+## Important stuff below
+
+### Entire US county map - nonresponse rate
+
 ```{r}
-plot_usmap(regions = "counties", data = questions_by_county, values = "null_percent", color = "gray") +
+plot_usmap(regions = "counties", data = questions_by_county, values = "null_percent", color = NA) +
   scale_fill_continuous(
     low = "white", high = "red", name = "Nonresponse rate", label = scales::comma
   ) +
@@ -166,12 +170,10 @@ plot_usmap(regions = "counties", data = questions_by_county, values = "null_perc
 
 ```
 
-florida vs texas
+### Zooming into Florida and Texas
 
 ```{r}
-# florida
-
-plot_usmap(include = c("FL", "TX"), regions = "counties", data = questions_by_county, values = "null_percent", color = "gray") +
+plot_usmap(include = c("FL", "TX"), regions = "counties", data = questions_by_county, values = "null_percent", color = NA) +
   scale_fill_continuous(
     low = "white", high = "red", name = "Nonresponse rate", label = scales::comma
   ) +
@@ -179,6 +181,10 @@ plot_usmap(include = c("FL", "TX"), regions = "counties", data = questions_by_co
   theme(legend.position = "bottom")
   
 ```
+
+### Comparing Florida and Texas proportions of nonresponse rates over time
+
+METHINKS THIS IS A VERY USEFUL PLOT!!!!!!!
 
 ```{r}
 texas_ignored <- questions %>%
@@ -254,65 +260,31 @@ florida_proportions <- florida_asked_n %>%
 
 combined_proportions <-
   texas_proportions %>%
-    left_join(florida_proportions, by = "Date") %>%
-    select(Date, propTX, propFL) %>%
-    rename(TX = "propTX", FL = "propFL") %>%
-    pivot_longer(
-      cols = c(TX, FL),
-      names_to = "state",
-      values_to = "proportion"
-    )
+  left_join(florida_proportions, by = "Date") %>%
+  select(Date, propTX, propFL) %>%
+  rename(TX = "propTX", FL = "propFL") %>%
+  pivot_longer(
+    cols = c(TX, FL),
+    names_to = "state",
+    values_to = "proportion"
+  ) %>%
+  mutate(
+    below_threshold = proportion <= 0.1
+  )
 
 combined_proportions %>%
   ggplot() +
-  geom_col(aes(x = Date, y = proportion, fill = state)) +
+  geom_col(aes(x = Date, y = proportion, fill = below_threshold)) +
   facet_grid(~state) +
   scale_x_discrete(breaks = c("2018-01", "2019-01", "2020-01", "2021-01")) +
-  ggtitle("Proportion of Asked but Unanswered Questions for FL and TX") +
-  theme(legend.position = "none")
+  ggtitle("Proportion of Asked but Unanswered Questions for FL and TX")
 
 ```
 
 Interesting points:
 
--   late 2018 was a huge spike for both
+-   late 2018 was a huge spike for both - June/July-ish
 
 -   both were at a low in beginning of 2020 and have been increasing ever since
 
-```{r}
-# Need to connect the taken on and asked on values for every individual question raised. and then 
-
-ignored_TX <- questions %>%
-  filter(StateAbbr == "TX", TakenOnUtc == "NULL") %>%
-  separate(col = AskedOnUtc, into = c("Date", "ignore1"), sep = -12) %>%
-  select(
-    Date, TakenOnUtc, -ignore1
-  ) %>%
-  count(Date)
-ignored_TX
-
-# questions %>%
-#   # separate(col = ClosedOnUtc, into = c("TakenTX", "ignore1"), sep = -12) %>%
-#   select(
-#     StateAbbr,
-#     # County,
-#     TakenByAttorneyUno,
-#     
-#     # -ignore1
-#   ) %>%
-#   filter(StateAbbr == "TX") %>%
-#   select(
-#     -StateAbbr
-#   ) %>%
-#   count(TakenByAttorneyUno) %>%
-#   rename(
-#     Date = "TakenByAttorneyUno",
-#     TakenTX = "n"
-#   )
-```
-
-September 2017
-
-July 2018
-
-april 2019
+    -   check min value for texas (should be in 2020)
