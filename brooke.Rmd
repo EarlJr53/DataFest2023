@@ -1,5 +1,5 @@
 ---
-title: "data"
+title: "brooke"
 output: html_document
 date: "2023-04-14"
 ---
@@ -47,14 +47,14 @@ glimpse(subcategories)
 ```
 
 ```{r}
-subcategories %>%
-  group_by(Subcategory) %>%
+categories %>%
+  group_by(Category) %>%
   summarize()
 ```
 
 ```{r}
 questionposts %>%
-  filter(str_detect(PostText, "transgender")) %>%
+  filter(str_detect(PostText, "gay")) %>%
   count(StateAbbr) %>%
   arrange(desc(n))
 
@@ -64,7 +64,46 @@ questionposts %>%
   group_by(Category, Subcategory) %>%
   summarize()
 
+questionposts %>%
+  filter(str_detect(PostText, "transgender")) %>%
+  left_join(questions, by = "QuestionUno") %>%
+  count(Subcategory) %>%
+  arrange(desc(n))
+
 questions %>%
   filter(Subcategory == "Name Change" | Subcategory == "LGBT Issues") %>%
   count(Subcategory)
+```
+
+```{r}
+questions %>%
+  filter(Category == "Housing and Homelessness") %>%
+  count(StateAbbr) %>%
+  arrange(desc(n))
+
+questions %>%
+  
+```
+
+```{r}
+questions %>%
+  left_join(clients, by = c("AskedByClientUno" = "ClientUno", "StateAbbr")) %>%
+  group_by(StateAbbr) %>%
+  mutate(
+    is_null = 1 * (TakenByAttorneyUno == "NULL"),
+  ) %>%
+  count(is_null) %>%
+  pivot_wider(
+    names_from = "is_null",
+    names_prefix = "null",
+    values_from = "n"
+  ) %>%
+  mutate(
+    null_percent = null1 / (null0 + null1)
+  ) %>%
+  arrange(desc(null_percent))
+```
+
+```{r}
+
 ```
