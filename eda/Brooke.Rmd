@@ -15,35 +15,35 @@ Let's glimpse the datasets to get an overview of what variables we'll be working
 
 ```{r}
 # Glimpse data
-attorneys_data <- read_csv("data/DataFest_2023_Data/attorneys.csv")
+attorneys_data <- read_csv("../data/DataFest_2023_Data/attorneys.csv")
 
 glimpse(attorneys_data)
 
-attorneytimeentries <- read_csv("data/DataFest_2023_Data/attorneytimeentries.csv")
+attorneytimeentries <- read_csv("../data/DataFest_2023_Data/attorneytimeentries.csv")
 
 glimpse(attorneytimeentries)
 
-categories <- read_csv("data/DataFest_2023_Data/categories.csv")
+categories <- read_csv("../data/DataFest_2023_Data/categories.csv")
 
 glimpse(categories)
 
-clients <- read_csv("data/DataFest_2023_Data/clients.csv")
+clients <- read_csv("../data/DataFest_2023_Data/clients.csv")
 
 glimpse(clients)
 
-questionposts <- read_csv("data/DataFest_2023_Data/questionposts.csv")
+questionposts <- read_csv("../data/DataFest_2023_Data/questionposts.csv")
 
 glimpse(questionposts)
 
-questions <- read_csv("data/DataFest_2023_Data/questions.csv")
+questions <- read_csv("../data/DataFest_2023_Data/questions.csv")
 
 glimpse(questions)
 
-statesites <- read_csv("data/DataFest_2023_Data/statesites.csv")
+statesites <- read_csv("../data/DataFest_2023_Data/statesites.csv")
 
 glimpse(statesites)
 
-subcategories <- read_csv("data/DataFest_2023_Data/subcategories.csv")
+subcategories <- read_csv("../data/DataFest_2023_Data/subcategories.csv")
 
 glimpse(subcategories)
 ```

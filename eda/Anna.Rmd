@@ -11,24 +11,24 @@ library(ggplot2)
 
 ```{r include=FALSE}
   # data on voleteer atorneys
-attorneys_data <- read_csv("data/DataFest_2023_Data/attorneys.csv")
+attorneys_data <- read_csv("../data/DataFest_2023_Data/attorneys.csv")
   # time sheet data 
-attorneytimeentries <- read_csv("data/DataFest_2023_Data/attorneytimeentries.csv")
+attorneytimeentries <- read_csv("../data/DataFest_2023_Data/attorneytimeentries.csv")
   # client 
-clients <- read_csv("data/DataFest_2023_Data/clients.csv")
+clients <- read_csv("../data/DataFest_2023_Data/clients.csv")
 
-questionposts <- read_csv("data/DataFest_2023_Data/questionposts.csv")
+questionposts <- read_csv("../data/DataFest_2023_Data/questionposts.csv")
 
-questions <- read_csv("data/DataFest_2023_Data/questions.csv")
+questions <- read_csv("../data/DataFest_2023_Data/questions.csv")
 
 ##
 
-statesites <- read_csv("data/DataFest_2023_Data/statesites.csv")
+statesites <- read_csv("../data/DataFest_2023_Data/statesites.csv")
 
   # Legal Services Corporation universal catagories for all states
-categories <- read_csv("data/DataFest_2023_Data/categories.csv")
+categories <- read_csv("../data/DataFest_2023_Data/categories.csv")
   # subcatagories spesific to states
-subcategories <- read_csv("data/DataFest_2023_Data/statesites.csv")
+subcategories <- read_csv("../data/DataFest_2023_Data/statesites.csv")
 ```
 
 ```{r}
