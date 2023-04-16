@@ -123,8 +123,6 @@ df_responses %>%
     fill = Reporting
   )) +
   ylim(0, 1)
-
-
 ```
 
 ```{r}
@@ -140,8 +138,6 @@ df_responses %>%
   xlab("Hours Logged per Active Attorney") +
   ylab("Response Rate (Questions / Questions Taken by Attorney)")
 ```
-<<<<<<< HEAD
-
 ```{r}
 df_responses %>% 
   left_join(numAternyTotattimePerstate, by = "StateAbbr") %>%
@@ -170,15 +166,3 @@ df_responses %>%
   xlab("Questions Per Active Attorney") +
   ylab("Response Rate (Questions / Questions Taken by Attorney)")
 ```
-
-```{r}
-
-```
-
-Find the number of active attorneys in our 15 relevant states
-
-```{r}
-
-```
-=======
->>>>>>> 9d5210e3a868e4cbc920d0c432dde30ba0d2c9b4
