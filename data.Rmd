@@ -147,6 +147,21 @@ df_responses %>%
   ylim(0, 1)
 ```
 
+```{r}
+df_responses %>% 
+  filter(StateAbbr == 'TX') %>% 
+  # mutate_at(c('response_rate', 'StateAbbr'), as.factor) %>%
+  # mutate(StateAbbr = fct_reorder(StateAbbr, response_rate)) %>% 
+  ggplot() +
+  geom_point(aes(
+    x = hoursper,
+    y = response_rate,
+    color = subcategories
+  )) +
+  # scale_fill_continuous(type = "viridis") +
+  ylim(0, 1)
+```
+
 Find the number of active attorneys in our 15 relevant states
 
 ```{r}
