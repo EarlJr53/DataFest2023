@@ -32,7 +32,7 @@ subcategories <- read_csv("data/DataFest_2023_Data/subcategories.csv")
 reporting_policy <- read_csv("data/reporting_policy.csv")
 ```
 
-Determines list of states with full data since 2020-01-01 and over 3000 questions in that period.
+Determines list of states with full data since 2020-01-01 and over 2400 questions in that period.
 
 ```{r}
 states_over_2400 <-
@@ -57,37 +57,6 @@ relevant_states <-
 Tidy data, combine relevant states, reporting policy, and response rates.
 
 ```{r}
-totalhoursperstate <-
-attorneytimeentries %>%
-  filter(
-    EnteredOnUtc > "2020-01-01 00:00:00",
-    StateAbbr %in% states_over_2400
-  ) %>% 
-  group_by(StateAbbr) %>% 
-  summarise(hours = sum(Hours)) %>% 
-  arrange(desc(hours))
-
-numAternyPerstate <-
-attorneytimeentries %>%
-  filter(
-    EnteredOnUtc > "2020-01-01 00:00:00",
-    StateAbbr %in% states_over_2400
-  ) %>% 
-  group_by(StateAbbr,AttorneyUno) %>% 
-  summarise(numEntriesPerAterny = n())  %>% 
-  summarise(numAterny = n()) %>% 
-  arrange(desc(numAterny))
-
-numAternyTotattimePerstate <-
-  full_join(numAternyPerstate, totalhoursperstate) %>% 
-  mutate(
-    hoursper = hours / numAterny
-  ) %>% 
-  arrange(desc(hoursper))
-numAternyTotattimePerstate
-```
-
-```{r}
 df_responses <-
   questions %>% 
   filter(StateAbbr %in% relevant_states, AskedOnUtc >= "2020-01-01 00:00:00") %>%
@@ -109,8 +78,38 @@ df_responses <-
     total_questions = nonresponses + responses,
     response_rate = responses / total_questions
   ) %>%
-  left_join(reporting_policy, by = c("StateAbbr" = "State")) %>%
-  left_join(numAternyTotattimePerstate, by = "StateAbbr")
+  left_join(reporting_policy, by = c("StateAbbr" = "State"))
+```
+
+```{r}
+totalhoursperstate <-
+  attorneytimeentries %>%
+  filter(
+    EnteredOnUtc > "2020-01-01 00:00:00",
+    StateAbbr %in% relevant_states
+  ) %>% 
+  group_by(StateAbbr) %>% 
+  summarise(hours = sum(Hours)) %>% 
+  arrange(desc(hours))
+
+numAternyPerstate <-
+  attorneytimeentries %>%
+  filter(
+    EnteredOnUtc > "2020-01-01 00:00:00",
+    StateAbbr %in% relevant_states
+  ) %>% 
+  group_by(StateAbbr,AttorneyUno) %>% 
+  summarise(numEntriesPerAterny = n())  %>% 
+  summarise(numAterny = n()) %>% 
+  arrange(desc(numAterny))
+
+numAternyTotattimePerstate <-
+  full_join(numAternyPerstate, totalhoursperstate) %>% 
+  mutate(
+    hoursper = hours / numAterny
+  ) %>% 
+  arrange(desc(hoursper))
+numAternyTotattimePerstate
 ```
 
 Plot by reporting policy
@@ -135,41 +134,24 @@ df_responses %>%
 
 ```{r}
 df_responses %>% 
-  # mutate_at(c('response_rate', 'StateAbbr'), as.factor) %>%
-  # mutate(StateAbbr = fct_reorder(StateAbbr, response_rate)) %>% 
+  left_join(numAternyTotattimePerstate, by = "StateAbbr") %>%
   ggplot() +
   geom_point(aes(
     x = hoursper,
     y = response_rate,
     color = StateAbbr
   )) +
-  # scale_fill_continuous(type = "viridis") +
-  ylim(0, 1)
+  ylim(0, 1) +
+  xlab("Hours Logged per Active Attorney") +
+  ylab("Response Rate (Questions / Questions Taken by Attorney)")
 ```
 
 ```{r}
-df_responses %>% 
-  filter(StateAbbr == 'TX') %>% 
-  # mutate_at(c('response_rate', 'StateAbbr'), as.factor) %>%
-  # mutate(StateAbbr = fct_reorder(StateAbbr, response_rate)) %>% 
-  ggplot() +
-  geom_point(aes(
-    x = hoursper,
-    y = response_rate,
-    color = subcategories
-  )) +
-  # scale_fill_continuous(type = "viridis") +
-  ylim(0, 1)
+
 ```
 
 Find the number of active attorneys in our 15 relevant states
 
 ```{r}
-active_attorneys <- attorneys_data %>%
-  filter(
-    CreatedUtc > "2020-01-01 00:00:00",
-    StateAbbr %in% states_over_2400
-  ) %>%
-  count(StateAbbr)
-active_attorneys
+
 ```
