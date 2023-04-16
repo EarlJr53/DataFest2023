@@ -31,6 +31,8 @@ statesites <- read_csv("data/DataFest_2023_Data/statesites.csv")
 subcategories <- read_csv("data/DataFest_2023_Data/subcategories.csv")
 
 reporting_policy <- read_csv("data/reporting_policy.csv")
+
+ease_of_access <- read_csv("data/easeofaccess.csv")
 ```
 
 Determines list of states with full data since 2020-01-01 and over 2400 questions in that period.
@@ -113,17 +115,20 @@ attorney_time_state <-
 attorney_time_state
 ```
 
-Plot by reporting policy
+Plot by feature on State BAR webpage
 
 ```{r}
 df_responses %>% 
+  left_join(ease_of_access, by = c("StateAbbr" = "State")) %>% 
   ggplot() +
   geom_col(aes(
-    x = fct_reorder(StateAbbr, response_rate),
+    x = fct_reorder(StateAbbr, desc(response_rate)),
     y = response_rate,
-    fill = Reporting
+    fill = featured
   )) +
-  ylim(0, 1)
+  ylim(0, 1) +
+  xlab("State") +
+  ylab("Response Rate")
 ```
 
 ```{r}
@@ -180,4 +185,11 @@ df_responses %>%
   ylab("Response Rate (Questions / Questions Taken by Attorney)") +
   ggtitle("Response Rate vs. Number of Questions per Active Attorney by State") +
   theme(legend.position="none")
+```
+
+```{r}
+df_responses %>% 
+  left_join(ease_of_access, by = c("StateAbbr" = "State")) %>% 
+  arrange(desc(response_rate)) %>% 
+  select(StateAbbr, response_rate, featured)
 ```

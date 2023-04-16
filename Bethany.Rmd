@@ -7,48 +7,33 @@ date: "2023-04-14"
 ```{r}
 library(tidyverse)
 library(ggplot2)
+library(readxl)
+
 ```
 
 ```{r}
 # Glimpse data
-attorneys_data <- read_csv("data/DataFest_2023_Data/attorneys.csv")
-
-glimpse(attorneys_data)
+attorneys <- read_csv("data/DataFest_2023_Data/attorneys.csv")
 
 attorneytimeentries <- read_csv("data/DataFest_2023_Data/attorneytimeentries.csv")
 
-glimpse(attorneytimeentries)
-
 categories <- read_csv("data/DataFest_2023_Data/categories.csv")
-
-glimpse(categories)
 
 clients <- read_csv("data/DataFest_2023_Data/clients.csv")
 
-glimpse(clients)
-
 questionposts <- read_csv("data/DataFest_2023_Data/questionposts.csv")
-
-glimpse(questionposts)
 
 questions <- read_csv("data/DataFest_2023_Data/questions.csv")
 
-glimpse(questions)
-
 statesites <- read_csv("data/DataFest_2023_Data/statesites.csv")
 
-glimpse(statesites)
-
 subcategories <- read_csv("data/DataFest_2023_Data/statesites.csv")
-
-glimpse(subcategories)
-
 
 
 ```
 ```{r}
 questions%>% 
-  filter(AskedOnUtc > '2020-01-01 12:00:00.000') %>% 
+  filter(AskedOnUtc > '2020-01-01 00:00:00.000') %>% 
   group_by(StateAbbr) %>% 
   count() %>% 
   arrange(desc(n))
@@ -79,7 +64,7 @@ num_null <-
 #     select(is_null, everything())
 
 questions %>%
-  filter(AskedOnUtc > '2020-01-01 12:00:00.000') %>% 
+  filter(AskedOnUtc > '2020-01-01 00:00:00.000') %>% 
   group_by(StateAbbr) %>%
   mutate(
     is_null = 1 * (TakenByAttorneyUno == "NULL"),
@@ -96,7 +81,7 @@ questions %>%
   arrange(desc(null_percent))
 ```
 ```{r}
-  questions %>% 
+  relevant_states %>% 
     group_by(Category) %>%
   mutate(
     is_null = 1 * (TakenByAttorneyUno == "NULL"),
@@ -114,20 +99,24 @@ questions %>%
 ```
 
 ```{r}
-questions %>%
-   group_by(StateAbbr) %>%
-  mutate(
-    is_null = 1 * (TakenByAttorneyUno == "NULL"),
-  ) %>%
-  count(is_null) %>%
-  pivot_wider(
-    names_from = "is_null",
-    names_prefix = "null",
-    values_from = "n"
-  ) %>%
-  mutate(
-    null_percent = null1 / (null0 + null1)
-  ) %>% 
-  arrange(desc(null_percent))
+relevant_states <-
+  questions %>% 
+  group_by(StateAbbr) %>% 
+  summarize(start = min(AskedOnUtc)) %>% 
+  filter(start < "2020-01-01 00:00:00") %>%
+  pull(StateAbbr)
 
+relevant_states
+```
+```{r}
+reporting_data <- read_csv("data/reporting_policy.csv")
+```
+```{r}
+states_over_2400 <-
+  questions %>%
+  group_by(StateAbbr) %>%
+  filter(AskedOnUtc >= "2020-01-01 00:00:00") %>% 
+  count(StateAbbr) %>%
+  filter(n >= 2400) %>%
+  pull(StateAbbr)
 ```
