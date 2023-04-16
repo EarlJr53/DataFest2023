@@ -7,6 +7,7 @@ date: "2023-04-14"
 ```{r}
 library(tidyverse)
 library(ggplot2)
+library(ggrepel)
 ```
 
 Let's glimpse the datasets to get an overview of what variables we'll be working with.
@@ -128,15 +129,20 @@ df_responses %>%
 ```{r}
 df_responses %>% 
   left_join(attorney_time_state, by = "StateAbbr") %>%
-  ggplot() +
-  geom_point(aes(
+  ggplot(mapping = aes(
     x = hoursper,
     y = response_rate,
     color = StateAbbr
   )) +
+  geom_text_repel(
+    mapping = aes(label = StateAbbr, color = StateAbbr)
+  ) +
+  geom_point() +
   ylim(0, 1) +
   xlab("Hours Logged per Active Attorney") +
-  ylab("Response Rate (Questions / Questions Taken by Attorney)")
+  ylab("Response Rate (Questions / Questions Taken by Attorney)") +
+  ggtitle("Number of Asked Questions vs. Attorney Logged Hours by State") +
+  theme(legend.position="none")
 ```
 
 ```{r}
