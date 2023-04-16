@@ -32,6 +32,26 @@ subcategories <- read_csv("data/DataFest_2023_Data/statesites.csv")
 ```
 
 ```{r}
+states_over_2400 <-
+  questions %>%
+  group_by(StateAbbr) %>%
+  filter(AskedOnUtc >= "2020-01-01 00:00:00") %>% 
+  count(StateAbbr) %>%
+  filter(n >= 2400) %>%
+  pull(StateAbbr)
+
+relevant_states <-
+  questions %>% 
+  group_by(StateAbbr) %>% 
+  summarize(start = min(AskedOnUtc)) %>%
+  filter(
+    start < "2020-01-01 00:00:00",
+    StateAbbr %in% states_over_2400
+  ) %>%
+  pull(StateAbbr)
+```
+
+```{r}
 questionposts %>%
   filter(str_detect(PostText, "transgender")) %>%
   left_join(questions, by = "QuestionUno") %>%
@@ -279,6 +299,24 @@ attorneys_data %>%
 
 ```{r}
 attorneytimeentries
+
+
+
+
+attorneytimeentries %>%
+  filter(
+    EnteredOnUtc > "2020-01-01 00:00:00",
+    StateAbbr %in% states_over_2400
+  ) %>% 
+  group_by(StateAbbr, AttorneyUno) %>% 
+  summarise(hours = sum(Hours), meanTime = mean(Hours)) %>% 
+  arrange(desc(meanTime))
+
+
+```
+
+```{r}
+totalhoursperstate <-
 attorneytimeentries %>%
   filter(
     EnteredOnUtc > "2020-01-01 00:00:00",
@@ -288,21 +326,7 @@ attorneytimeentries %>%
   summarise(hours = sum(Hours)) %>% 
   arrange(desc(hours))
 
-attorneytimeentries
-attorneytimeentries %>%
-  filter(
-    EnteredOnUtc > "2020-01-01 00:00:00",
-    StateAbbr %in% states_over_2400
-  ) %>% 
-  group_by(StateAbbr, AttorneyUno) %>% 
-  summarise(hours = sum(Hours), meanTime = mean(Hours)) %>% 
-  arrange(desc(hours))
-
-
-```
-
-```{r}
-attorneytimeentries
+numAternyPerstate <-
 attorneytimeentries %>%
   filter(
     EnteredOnUtc > "2020-01-01 00:00:00",
@@ -312,4 +336,51 @@ attorneytimeentries %>%
   summarise(numEntriesPerAterny = n())  %>% 
   summarise(numAterny = n()) %>% 
   arrange(desc(numAterny))
+
+numAternyTotattimePerstate <-
+  full_join(numAternyPerstate, totalhoursperstate) %>% 
+  mutate(
+    hoursper = hours / numAterny
+  ) %>% 
+  arrange(desc(hoursper))
+numAternyTotattimePerstate
+
+# numAternyTotattimePerstate %>% 
+#   ggplot(aes(numAterny, hours, color = StateAbbr))+
+#   geom_point()
+df_responses <-
+  questions %>% 
+  filter(StateAbbr %in% relevant_states, AskedOnUtc >= "2020-01-01 00:00:00") %>%
+  group_by(StateAbbr) %>% 
+  mutate(
+    response_received = 1 * (TakenByAttorneyUno != "NULL")
+  ) %>% 
+  count(response_received) %>%
+  pivot_wider(
+    names_from = "response_received",
+    names_prefix = "response_",
+    values_from = "n"
+  ) %>%
+  rename(
+    responses = response_1,
+    nonresponses = response_0
+  ) %>%
+  mutate(
+    total_questions = nonresponses + responses,
+    response_rate = responses / total_questions
+  ) %>%
+  left_join(reporting_policy, by = c("StateAbbr" = "State")) %>%
+  left_join(numAternyTotattimePerstate, by = c("StateAbbr" = "State"))
+
+```
+
+```{r}
+attorneytimeentries %>%
+  filter(
+    EnteredOnUtc > "2020-01-01 00:00:00",
+    StateAbbr %in% states_over_2400,
+    Hours < 40
+  ) %>% 
+  ggplot() +
+  geom_boxplot(aes(StateAbbr, Hours, color = StateAbbr))
 ```

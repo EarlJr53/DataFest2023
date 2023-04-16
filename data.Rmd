@@ -57,6 +57,37 @@ relevant_states <-
 Tidy data, combine relevant states, reporting policy, and response rates.
 
 ```{r}
+totalhoursperstate <-
+attorneytimeentries %>%
+  filter(
+    EnteredOnUtc > "2020-01-01 00:00:00",
+    StateAbbr %in% states_over_2400
+  ) %>% 
+  group_by(StateAbbr) %>% 
+  summarise(hours = sum(Hours)) %>% 
+  arrange(desc(hours))
+
+numAternyPerstate <-
+attorneytimeentries %>%
+  filter(
+    EnteredOnUtc > "2020-01-01 00:00:00",
+    StateAbbr %in% states_over_2400
+  ) %>% 
+  group_by(StateAbbr,AttorneyUno) %>% 
+  summarise(numEntriesPerAterny = n())  %>% 
+  summarise(numAterny = n()) %>% 
+  arrange(desc(numAterny))
+
+numAternyTotattimePerstate <-
+  full_join(numAternyPerstate, totalhoursperstate) %>% 
+  mutate(
+    hoursper = hours / numAterny
+  ) %>% 
+  arrange(desc(hoursper))
+numAternyTotattimePerstate
+```
+
+```{r}
 df_responses <-
   questions %>% 
   filter(StateAbbr %in% relevant_states, AskedOnUtc >= "2020-01-01 00:00:00") %>%
@@ -78,7 +109,8 @@ df_responses <-
     total_questions = nonresponses + responses,
     response_rate = responses / total_questions
   ) %>%
-  left_join(reporting_policy, by = c("StateAbbr" = "State"))
+  left_join(reporting_policy, by = c("StateAbbr" = "State")) %>%
+  left_join(numAternyTotattimePerstate, by = "StateAbbr")
 ```
 
 Plot by reporting policy
@@ -99,6 +131,20 @@ df_responses %>%
   ylim(0, 1)
 
 
+```
+
+```{r}
+df_responses %>% 
+  # mutate_at(c('response_rate', 'StateAbbr'), as.factor) %>%
+  # mutate(StateAbbr = fct_reorder(StateAbbr, response_rate)) %>% 
+  ggplot() +
+  geom_point(aes(
+    x = hoursper,
+    y = response_rate,
+    color = StateAbbr
+  )) +
+  # scale_fill_continuous(type = "viridis") +
+  ylim(0, 1)
 ```
 
 Find the number of active attorneys in our 15 relevant states
