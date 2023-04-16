@@ -153,30 +153,38 @@ df_responses %>%
 ```{r}
 df_responses %>% 
   left_join(attorney_time_state, by = "StateAbbr") %>%
-  ggplot() +
-  geom_point(aes(
+  ggplot(aes(
     x = num_attorney,
-    y = response_rate,
-    color = StateAbbr
+    y = response_rate
   )) +
+  geom_point(aes(color = StateAbbr)) +
+  geom_text_repel(
+    mapping = aes(label = StateAbbr, color = StateAbbr)
+  ) +
   ylim(0, 1) +
-  xlab("Active Attorney") +
-  ylab("Response Rate (Questions / Questions Taken by Attorney)")
+  xlab("Number of Active Attorneys") +
+  ylab("Response Rate (Questions Taken by Attorney / Total Questions)") +
+  ggtitle("Response Rate vs. Number of Active Attorneys by State") +
+  theme(legend.position="none")
 ```
 
 ```{r}
 df_responses %>% 
   left_join(attorney_time_state, by = "StateAbbr") %>%
   mutate(casePer = total_questions/num_attorney) %>% 
-  ggplot() +
-  geom_point(aes(
+  ggplot(aes(
     x = casePer,
-    y = response_rate,
-    color = StateAbbr
-  )) +
+    y = response_rate)
+  ) +
+  geom_point(aes(color = StateAbbr)) +
+  geom_text_repel(
+    mapping = aes(label = StateAbbr, color = StateAbbr)
+  ) +
   ylim(0, 1) +
-  xlab("Questions Per Active Attorney") +
-  ylab("Response Rate (Questions / Questions Taken by Attorney)")
+  xlab("Total Number of Questions Per Active Attorney") +
+  ylab("Response Rate (Questions / Questions Taken by Attorney)") +
+  ggtitle("Response Rate vs. Number of Questions per Active Attorney by State") +
+  theme(legend.position="none")
 ```
 
 ```{r}
