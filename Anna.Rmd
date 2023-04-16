@@ -371,7 +371,6 @@ df_responses <-
   ) %>%
   left_join(reporting_policy, by = c("StateAbbr" = "State")) %>%
   left_join(numAternyTotattimePerstate, by = c("StateAbbr" = "State"))
-
 ```
 
 ```{r}
