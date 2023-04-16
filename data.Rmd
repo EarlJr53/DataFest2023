@@ -115,18 +115,13 @@ numAternyTotattimePerstate
 Plot by reporting policy
 
 ```{r}
-# df_responses
-
 df_responses %>% 
-  # mutate_at(c('response_rate', 'StateAbbr'), as.factor) %>%
-  # mutate(StateAbbr = fct_reorder(StateAbbr, response_rate)) %>% 
   ggplot() +
   geom_col(aes(
     x = fct_reorder(StateAbbr, response_rate),
     y = response_rate,
     fill = Reporting
   )) +
-  # scale_fill_continuous(type = "viridis") +
   ylim(0, 1)
 
 
@@ -144,14 +139,4 @@ df_responses %>%
   ylim(0, 1) +
   xlab("Hours Logged per Active Attorney") +
   ylab("Response Rate (Questions / Questions Taken by Attorney)")
-```
-
-```{r}
-
-```
-
-Find the number of active attorneys in our 15 relevant states
-
-```{r}
-
 ```
