@@ -82,7 +82,7 @@ df_responses <-
 ```
 
 ```{r}
-totalhoursperstate <-
+hours_state <-
   attorneytimeentries %>%
   filter(
     EnteredOnUtc > "2020-01-01 00:00:00",
@@ -92,24 +92,24 @@ totalhoursperstate <-
   summarise(hours = sum(Hours)) %>% 
   arrange(desc(hours))
 
-numAternyPerstate <-
+attorney_state <-
   attorneytimeentries %>%
   filter(
     EnteredOnUtc > "2020-01-01 00:00:00",
     StateAbbr %in% relevant_states
   ) %>% 
   group_by(StateAbbr,AttorneyUno) %>% 
-  summarise(numEntriesPerAterny = n())  %>% 
-  summarise(numAterny = n()) %>% 
-  arrange(desc(numAterny))
+  summarise(entries_attorney = n())  %>% 
+  summarise(num_attorney = n()) %>% 
+  arrange(desc(num_attorney))
 
-numAternyTotattimePerstate <-
-  full_join(numAternyPerstate, totalhoursperstate) %>% 
+attorney_time_state <-
+  full_join(attorney_state, hours_state) %>% 
   mutate(
-    hoursper = hours / numAterny
+    hoursper = hours / num_attorney
   ) %>% 
   arrange(desc(hoursper))
-numAternyTotattimePerstate
+attorney_time_state
 ```
 
 Plot by reporting policy
@@ -127,7 +127,7 @@ df_responses %>%
 
 ```{r}
 df_responses %>% 
-  left_join(numAternyTotattimePerstate, by = "StateAbbr") %>%
+  left_join(attorney_time_state, by = "StateAbbr") %>%
   ggplot() +
   geom_point(aes(
     x = hoursper,
@@ -138,12 +138,13 @@ df_responses %>%
   xlab("Hours Logged per Active Attorney") +
   ylab("Response Rate (Questions / Questions Taken by Attorney)")
 ```
+
 ```{r}
 df_responses %>% 
-  left_join(numAternyTotattimePerstate, by = "StateAbbr") %>%
+  left_join(attorney_time_state, by = "StateAbbr") %>%
   ggplot() +
   geom_point(aes(
-    x = numAterny.x,
+    x = num_attorney,
     y = response_rate,
     color = StateAbbr
   )) +
@@ -154,8 +155,8 @@ df_responses %>%
 
 ```{r}
 df_responses %>% 
-  left_join(numAternyTotattimePerstate, by = "StateAbbr") %>%
-  mutate(casePer = total_questions/numAterny.x) %>% 
+  left_join(attorney_time_state, by = "StateAbbr") %>%
+  mutate(casePer = total_questions/num_attorney) %>% 
   ggplot() +
   geom_point(aes(
     x = casePer,
