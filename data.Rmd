@@ -147,6 +147,35 @@ df_responses %>%
 ```
 
 ```{r}
+df_responses %>% 
+  left_join(numAternyTotattimePerstate, by = "StateAbbr") %>%
+  ggplot() +
+  geom_point(aes(
+    x = numAterny.x,
+    y = response_rate,
+    color = StateAbbr
+  )) +
+  ylim(0, 1) +
+  xlab("Active Attorney") +
+  ylab("Response Rate (Questions / Questions Taken by Attorney)")
+```
+
+```{r}
+df_responses %>% 
+  left_join(numAternyTotattimePerstate, by = "StateAbbr") %>%
+  mutate(casePer = total_questions/numAterny.x) %>% 
+  ggplot() +
+  geom_point(aes(
+    x = casePer,
+    y = response_rate,
+    color = StateAbbr
+  )) +
+  ylim(0, 1) +
+  xlab("Questions Per Active Attorney") +
+  ylab("Response Rate (Questions / Questions Taken by Attorney)")
+```
+
+```{r}
 
 ```
 
