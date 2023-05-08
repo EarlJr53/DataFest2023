@@ -199,7 +199,7 @@ We narrowed down the states to investigate by limiting our time scale to Jan 1st
 
 ### Questions v. Attorneys and Hours
 
-```{r hours-perattorney, echo=FALSE, message=FALSE, warning=FALSE}
+```{r hours-per-attorney, echo=FALSE, message=FALSE, warning=FALSE}
 
 # Plot response rate for each state versus the number of active attorneys in the state
 df_responses %>% 
@@ -220,7 +220,7 @@ df_responses %>%
   theme(legend.position="none")
 ```
 
-```{r}
+```{r questions-per-attorney, echo=FALSE, message=FALSE, warning=FALSE}
 df_responses %>% 
   left_join(attorney_time_state, by = "StateAbbr") %>%
   mutate(casePer = total_questions/num_attorney) %>% 

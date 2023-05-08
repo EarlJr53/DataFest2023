@@ -88,28 +88,9 @@ and Georgia.
 
 ### Questions v. Attorneys and Hours
 
-![](Report_files/figure-gfm/hours-perattorney-1.png)<!-- -->
+![](Report_files/figure-gfm/hours-per-attorney-1.png)<!-- -->
 
-``` r
-df_responses %>% 
-  left_join(attorney_time_state, by = "StateAbbr") %>%
-  mutate(casePer = total_questions/num_attorney) %>% 
-  ggplot(aes(
-    x = casePer,
-    y = response_rate)
-  ) +
-  geom_point(aes(color = StateAbbr)) +
-  geom_text_repel(
-    mapping = aes(label = StateAbbr, color = StateAbbr)
-  ) +
-  ylim(0, 1) +
-  xlab("Total Number of Questions Per Active Attorney") +
-  ylab("Response Rate (Questions / Questions Taken by Attorney)") +
-  ggtitle("Response Rate vs. Number of Questions per Active Attorney by State") +
-  theme(legend.position="none")
-```
-
-![](Report_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
+![](Report_files/figure-gfm/questions-per-attorney-1.png)<!-- -->
 
 To answer this, we calculated the number of unique attorneys per state
 that logged any time on the website within our 2 year time scale. We
