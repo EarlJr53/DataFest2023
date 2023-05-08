@@ -1,7 +1,7 @@
 Disparities in Response Rates: An Investigation
 ================
 Brooke Moss, Lily Jiang, Anna Letcher Hartman, Bethany Costello
-2023-05-01
+2023-05-07
 
 - <a href="#background" id="toc-background">Background</a>
   - <a href="#the-dataset" id="toc-the-dataset">The Dataset</a>
@@ -22,10 +22,21 @@ Brooke Moss, Lily Jiang, Anna Letcher Hartman, Bethany Costello
 ### The Dataset
 
 During DataFest 2023, we were given datasets representing the American
-Bar Association’s Free Legal Answer Program (ABA FLA).
+Bar Association’s Free Legal Answers program (ABA FLA). The Free Legal
+Answers program is an online platform where the ABA provides pro bono
+(free of charge) legal services to most US states. Qualifying people
+(based on income thresholds) can submit questions to be researched and
+answered by volunteer lawyers \[DataFest Challenge Description\].
 
-<!--# Add additional dataset background -->
-<!--# Add discussion of dataset trust -->
+The data we received represents a full history of the program from
+August 2016 to January 2022, including client information, attorney
+information, correspondence details, and conversation text. The dataset
+seems to be completely comprehensive as it contains all questions asked
+through the online FLA program. However, because some of the variables
+(such as the hours logged by each attorney) are reliant on
+self-reporting measures, parts of the dataset are not particularly
+trustworthy. These variables contain variation that is impossible to
+account for.
 
 ### Methodology
 
@@ -35,27 +46,23 @@ users can submit legal questions, which are then “accepted” by an
 attorney. The attorney researches the question and communicates back and
 forth with the user to answer.
 
-We determined that if an attorney “accepted” a question, taking it into
-their purview, we would count that as a question that has been responded
+We determined that if an attorney “accepted” a question (taking it into
+their purview) we would count that as a question that has been responded
 to. However, if no attorney accepted the question, we would count that
 as a non-response.
 
 In order to count responses, we used the `TakenByAttorneyUno` variable
 from the `questions.csv` dataset. This variable represents the unique
-identifier of the attorney that accepted the question. If the column
-value was `NULL`, we counted that as a non-response. This is surely an
-under-counting of questions that were unresolved, as this column
-indicates whether or not an attorney responded to the original question.
-This fails to account for non-response cases in which a conversation
-occurs between client and attorney before an attorney stops responding
-or questions left unresolved.
-
-<!--# Add more discussion of potential causes of uncertainty in the data and our calculations -->
+identifier of the attorney that accepted the question. If no attorney
+accepted it, then the column value was `NULL` and we counted it as a
+non-response. This is surely an under-counting of questions that were
+unresolved, as this column only indicates whether or not an attorney
+responded to the original question. This fails to account for
+non-response cases in which a conversation occurs between client and
+attorney before an attorney stops responding or questions left
+unresolved.
 
 ### Our Question
-
-<!--# Add map plot?? -->
-<!--# Add `AskedOnUtc` plot?? -->
 
 When digging into response rates, we noticed a large discrepancy between
 the two states with the largest number of questions: Texas and Florida.
@@ -64,6 +71,10 @@ and had a similar number of active attorneys, number of attorney hours,
 and questions asked. However, the response rate in Florida was 87%, as
 opposed to 47% in Texas. This led to our research question: **what
 accounts for the diﬀerences in response rates among states?**
+
+![](Report_files/figure-gfm/questions-histo-1.png)<!-- -->
+
+![](Report_files/figure-gfm/map-plot-1.png)<!-- -->
 
 ## Investigation
 
@@ -79,7 +90,26 @@ and Georgia.
 
 ![](Report_files/figure-gfm/hours-perattorney-1.png)<!-- -->
 
-<!--# Add plot of Questions v. # of Attorneys -->
+``` r
+df_responses %>% 
+  left_join(attorney_time_state, by = "StateAbbr") %>%
+  mutate(casePer = total_questions/num_attorney) %>% 
+  ggplot(aes(
+    x = casePer,
+    y = response_rate)
+  ) +
+  geom_point(aes(color = StateAbbr)) +
+  geom_text_repel(
+    mapping = aes(label = StateAbbr, color = StateAbbr)
+  ) +
+  ylim(0, 1) +
+  xlab("Total Number of Questions Per Active Attorney") +
+  ylab("Response Rate (Questions / Questions Taken by Attorney)") +
+  ggtitle("Response Rate vs. Number of Questions per Active Attorney by State") +
+  theme(legend.position="none")
+```
+
+![](Report_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
 
 To answer this, we calculated the number of unique attorneys per state
 that logged any time on the website within our 2 year time scale. We
@@ -148,8 +178,6 @@ low response rates. We also urge the ABA to provide more surveys to
 Texas attorneys to make sense of the low response rate and large amount
 of time spent per question. We want to ensure that this trend does not
 continue in other states as this program expands.
-
-<!--# Do we want to elaborate?? -->
 
 ## References
 

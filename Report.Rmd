@@ -136,7 +136,25 @@ In order to count responses, we used the `TakenByAttorneyUno` variable from the 
 
 ### Our Question
 
-```{r}
+When digging into response rates, we noticed a large discrepancy between the two states with the largest number of questions: Texas and Florida. These states appeared to have begun the FLA program at a similar time and had a similar number of active attorneys, number of attorney hours, and questions asked. However, the response rate in Florida was 87%, as opposed to 47% in Texas. This led to our research question: **what accounts for the diﬀerences in response rates among states?**
+
+```{r questions-histo, echo=FALSE, message=FALSE, warning=FALSE}
+questions %>% 
+  filter(
+    StateAbbr == c('TX', 'FL')
+  ) %>%
+  ggplot() +
+  geom_histogram(aes(x = AskedOnUtc, alpha = 0.2), bins = 72) +
+  geom_histogram(
+    data = . %>%
+      filter(TakenByAttorneyUno != "NULL"),
+    aes(x = AskedOnUtc, fill = StateAbbr),
+    bins = 72
+  ) +
+  facet_wrap(facets =  vars(StateAbbr)) 
+```
+
+```{r map-plot, echo=FALSE, message=FALSE, warning=FALSE}
 # Create a helper tibble connecting FIPS codes with counties
 states_and_fips <- fips_codes %>%
   mutate(
@@ -174,24 +192,6 @@ plot_usmap(include = c("FL", "TX"), regions = "counties", data = questions_by_co
   labs(title = "Nonresponse rates for Texas and Florida") +
   theme(legend.position = "bottom")
 ```
-
-```{r}
-questions %>% 
-  filter(
-    StateAbbr == c('TX', 'FL')
-  ) %>%
-  ggplot() +
-  geom_histogram(aes(x = AskedOnUtc, alpha = 0.2), bins = 72) +
-  geom_histogram(
-    data = . %>%
-      filter(TakenByAttorneyUno != "NULL"),
-    aes(x = AskedOnUtc, fill = StateAbbr),
-    bins = 72
-  ) +
-  facet_wrap(facets =  vars(StateAbbr)) 
-```
-
-When digging into response rates, we noticed a large discrepancy between the two states with the largest number of questions: Texas and Florida. These states appeared to have begun the FLA program at a similar time and had a similar number of active attorneys, number of attorney hours, and questions asked. However, the response rate in Florida was 87%, as opposed to 47% in Texas. This led to our research question: **what accounts for the diﬀerences in response rates among states?**
 
 ## Investigation
 
@@ -269,8 +269,6 @@ We also investigated how accessible each state's ABA FLA was from each state's b
 ## Recommendations
 
 We would recommend that the ABA ask state bar associations to list the FLA link among pro bono opportunities for members. We also encourage the ABA to continue their work with the Baylor University School of Law and the Stanford Legal Design Lab creating auto emails for users waiting for an attorney to take their question. These emails containing answers to frequently asked questions could make a real diﬀerence in states with low response rates. We also urge the ABA to provide more surveys to Texas attorneys to make sense of the low response rate and large amount of time spent per question. We want to ensure that this trend does not continue in other states as this program expands.
-
-<!--# Do we want to elaborate?? -->
 
 ## References
 
