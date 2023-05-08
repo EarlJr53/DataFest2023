@@ -137,51 +137,32 @@ In order to count responses, we used the `TakenByAttorneyUno` variable from the 
 ### Our Question
 
 ```{r}
-# Create a helper table connecting FIPS codes with counties
-states_and_fips <-
-  fips_codes %>%
-  mutate(
-    fips = paste0(state_code, county_code)
-  ) %>%
-  select(state, county, fips) %>%
-  mutate(county = str_remove_all(county, " County"))
-
-# Count the number of questions unanswered from each county in the US
-questions_by_county <-
-  questions %>%
-  left_join(select(clients, -Id), by = c("StateAbbr", "AskedByClientUno" = "ClientUno")) %>%
-  group_by(County, StateAbbr) %>%
-  mutate(
-    is_null = 1 * (TakenByAttorneyUno == "NULL"),
-  ) %>%
-  count(is_null) %>%
-  pivot_wider(
-    names_from = "is_null",
-    names_prefix = "null",
-    values_from = "n"
-  ) %>%
-  mutate(
-    null_percent = null1 / (null0 + null1)
-  ) %>%
-  drop_na() %>%
-  left_join(states_and_fips, by = c("County" = "county", "StateAbbr" = "state")) %>%
-  arrange(desc(null_percent)) %>%
-  drop_na()
-
-# Plot the null response rates by county
-plot_usmap(regions = "counties", data = questions_by_county, values = "null_percent", color = NA) +
+plot_usmap(include = c("FL", "TX"), regions = "counties", data = questions_by_county, values = "null_percent", color = NA) +
   scale_fill_continuous(
     low = "white", high = "red", name = "Nonresponse rate", label = scales::comma
   ) +
-  labs(
-    title = "Noresponse Rates by US Counties",
-    # subtitle = "This is a blank map of the counties of the United States."
-  ) +
-  theme(legend.position = "right")
+  labs(title = "Nonresponse rates for Texas and Florida") +
+  theme(legend.position = "bottom")
 
 ```
 
 <!--# Add `AskedOnUtc` plot?? -->
+
+```{r}
+questions %>% 
+  filter(
+    StateAbbr == c('TX', 'FL')
+  ) %>%
+  ggplot() +
+  geom_histogram(aes(x = AskedOnUtc, alpha = 0.2), bins = 72) +
+  geom_histogram(
+    data = . %>%
+      filter(TakenByAttorneyUno != "NULL"),
+    aes(x = AskedOnUtc, fill = StateAbbr),
+    bins = 72
+  ) +
+  facet_wrap(facets =  vars(StateAbbr)) 
+```
 
 When digging into response rates, we noticed a large discrepancy between the two states with the largest number of questions: Texas and Florida. These states appeared to have begun the FLA program at a similar time and had a similar number of active attorneys, number of attorney hours, and questions asked. However, the response rate in Florida was 87%, as opposed to 47% in Texas. This led to our research question: **what accounts for the diﬀerences in response rates among states?**
 
@@ -193,7 +174,7 @@ We narrowed down the states to investigate by limiting our time scale to Jan 1st
 
 ```{r hours-perattorney, echo=FALSE, message=FALSE, warning=FALSE}
 
-# 
+# Plot response rate for each state versus the number of active attorneys in the state
 
 df_responses %>% 
   left_join(attorney_time_state, by = "StateAbbr") %>%
