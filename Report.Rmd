@@ -270,8 +270,6 @@ We also investigated how accessible each state's ABA FLA was from each state's b
 
 We would recommend that the ABA ask state bar associations to list the FLA link among pro bono opportunities for members. We also encourage the ABA to continue their work with the Baylor University School of Law and the Stanford Legal Design Lab creating auto emails for users waiting for an attorney to take their question. These emails containing answers to frequently asked questions could make a real diﬀerence in states with low response rates. We also urge the ABA to provide more surveys to Texas attorneys to make sense of the low response rate and large amount of time spent per question. We want to ensure that this trend does not continue in other states as this program expands.
 
-<!--# Do we want to elaborate?? -->
-
 ## References
 
 -   <https://www.tncourts.gov/sites/default/files/docs/atj_2016_pro_bono_report.pdf>
