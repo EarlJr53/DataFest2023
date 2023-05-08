@@ -124,7 +124,7 @@ attorney_time_state <-
 
 During DataFest 2023, we were given datasets representing the American Bar Association's Free Legal Answers program (ABA FLA). The Free Legal Answers program is an online platform where the ABA provides pro bono (free of charge) legal services to most US states. Qualifying people (based on income thresholds) can submit questions to be researched and answered by volunteer lawyers [DataFest Challenge Description].
 
-The data we received represents a full history of the program from August 2016 to January 2022, including client information, attorney information, correspondence details, and conversation text. The dataset seems to be completely comprehensive as it contains all questions asked through the online FLA program. However, because some of the variables (such as the hours logged by each attorney) are reliant on self-reporting measures, parts of the dataset are not particularly trustworthy. These variables contain variation that is impossible to account for.
+The data we received represents a full history of the program from August 2016 to January 2022, including client information, attorney information, correspondence details, and conversation text. The dataset appears to be completely comprehensive as it contains all questions asked through the online FLA program. However, because some of the variables (such as the hours logged by each attorney) are reliant on self-reporting measures, parts of the dataset are not particularly trustworthy. These variables contain variation that is impossible to account for.
 
 ### Methodology
 

@@ -1,31 +1,39 @@
 Disparities in Response Rates: An Investigation
 ================
 Brooke Moss, Lily Jiang, Anna Letcher Hartman, Bethany Costello
-2023-05-01
+2023-05-07
 
-- <a href="#background" id="toc-background">Background</a>
-  - <a href="#the-dataset" id="toc-the-dataset">The Dataset</a>
-  - <a href="#methodology" id="toc-methodology">Methodology</a>
-  - <a href="#our-question" id="toc-our-question">Our Question</a>
-- <a href="#investigation" id="toc-investigation">Investigation</a>
-  - <a href="#questions-v-attorneys-and-hours"
-    id="toc-questions-v-attorneys-and-hours">Questions v. Attorneys and
-    Hours</a>
-  - <a href="#outside-factors" id="toc-outside-factors">Outside Factors</a>
-  - <a href="#web-accessibility" id="toc-web-accessibility">Web
-    Accessibility</a>
-- <a href="#recommendations" id="toc-recommendations">Recommendations</a>
-- <a href="#references" id="toc-references">References</a>
+- [Background](#background)
+  - [The Dataset](#the-dataset)
+  - [Methodology](#methodology)
+  - [Our Question](#our-question)
+- [Investigation](#investigation)
+  - [Questions v. Attorneys and Hours](#questions-v-attorneys-and-hours)
+  - [Outside Factors](#outside-factors)
+  - [Web Accessibility](#web-accessibility)
+- [Recommendations](#recommendations)
+- [References](#references)
 
 ## Background
 
 ### The Dataset
 
 During DataFest 2023, we were given datasets representing the American
-Bar Association’s Free Legal Answer Program (ABA FLA).
+Bar Association’s Free Legal Answers program (ABA FLA). The Free Legal
+Answers program is an online platform where the ABA provides pro bono
+(free of charge) legal services to most US states. Qualifying people
+(based on income thresholds) can submit questions to be researched and
+answered by volunteer lawyers \[DataFest Challenge Description\].
 
-<!--# Add additional dataset background -->
-<!--# Add discussion of dataset trust -->
+The data we received represents a full history of the program from
+August 2016 to January 2022, including client information, attorney
+information, correspondence details, and conversation text. The dataset
+appears to be completely comprehensive as it contains all questions
+asked through the online FLA program. However, because some of the
+variables (such as the hours logged by each attorney) are reliant on
+self-reporting measures, parts of the dataset are not particularly
+trustworthy. These variables contain variation that is impossible to
+account for.
 
 ### Methodology
 
@@ -35,27 +43,87 @@ users can submit legal questions, which are then “accepted” by an
 attorney. The attorney researches the question and communicates back and
 forth with the user to answer.
 
-We determined that if an attorney “accepted” a question, taking it into
-their purview, we would count that as a question that has been responded
+We determined that if an attorney “accepted” a question (taking it into
+their purview) we would count that as a question that has been responded
 to. However, if no attorney accepted the question, we would count that
 as a non-response.
 
 In order to count responses, we used the `TakenByAttorneyUno` variable
 from the `questions.csv` dataset. This variable represents the unique
-identifier of the attorney that accepted the question. If the column
-value was `NULL`, we counted that as a non-response. This is surely an
-under-counting of questions that were unresolved, as this column
-indicates whether or not an attorney responded to the original question.
-This fails to account for non-response cases in which a conversation
-occurs between client and attorney before an attorney stops responding
-or questions left unresolved.
-
-<!--# Add more discussion of potential causes of uncertainty in the data and our calculations -->
+identifier of the attorney that accepted the question. If no attorney
+accepted it, then the column value was `NULL` and we counted it as a
+non-response. This is surely an under-counting of questions that were
+unresolved, as this column only indicates whether or not an attorney
+responded to the original question. This fails to account for
+non-response cases in which a conversation occurs between client and
+attorney before an attorney stops responding or questions left
+unresolved.
 
 ### Our Question
 
-<!--# Add map plot?? -->
-<!--# Add `AskedOnUtc` plot?? -->
+``` r
+# Create a helper tibble connecting FIPS codes with counties
+states_and_fips <- fips_codes %>%
+  mutate(
+    fips = paste0(state_code, county_code)
+  ) %>%
+  select(state, county, fips) %>%
+  mutate(county = str_remove_all(county, " County"))
+
+# Count the number of questions unanswered from each county in the US
+questions_by_county <- questions %>%
+  left_join(select(clients, -Id), by = c("StateAbbr", "AskedByClientUno" = "ClientUno")) %>%
+  group_by(County, StateAbbr) %>%
+  mutate(
+    is_null = 1 * (TakenByAttorneyUno == "NULL"),
+  ) %>%
+  count(is_null) %>%
+  pivot_wider(
+    names_from = "is_null",
+    names_prefix = "null",
+    values_from = "n"
+  ) %>%
+  mutate(
+    null_percent = null1 / (null0 + null1)
+  ) %>%
+  drop_na() %>%
+  left_join(states_and_fips, by = c("County" = "county", "StateAbbr" = "state")) %>%
+  arrange(desc(null_percent)) %>%
+  drop_na()
+
+# Plot the null response rates by county for Texas and Florida
+plot_usmap(include = c("FL", "TX"), regions = "counties", data = questions_by_county, values = "null_percent", color = NA) +
+  scale_fill_continuous(
+    low = "white", high = "red", name = "Nonresponse rate", label = scales::comma
+  ) +
+  labs(title = "Nonresponse rates for Texas and Florida") +
+  theme(legend.position = "bottom")
+```
+
+![](Report_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
+
+``` r
+questions %>% 
+  filter(
+    StateAbbr == c('TX', 'FL')
+  ) %>%
+  ggplot() +
+  geom_histogram(aes(x = AskedOnUtc, alpha = 0.2), bins = 72) +
+  geom_histogram(
+    data = . %>%
+      filter(TakenByAttorneyUno != "NULL"),
+    aes(x = AskedOnUtc, fill = StateAbbr),
+    bins = 72
+  ) +
+  facet_wrap(facets =  vars(StateAbbr)) 
+```
+
+    ## Warning: There was 1 warning in `filter()`.
+    ## ℹ In argument: `StateAbbr == c("TX", "FL")`.
+    ## Caused by warning in `StateAbbr == c("TX", "FL")`:
+    ## ! longer object length is not a multiple of shorter object length
+
+![](Report_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
 When digging into response rates, we noticed a large discrepancy between
 the two states with the largest number of questions: Texas and Florida.
@@ -79,7 +147,26 @@ and Georgia.
 
 ![](Report_files/figure-gfm/hours-perattorney-1.png)<!-- -->
 
-<!--# Add plot of Questions v. # of Attorneys -->
+``` r
+df_responses %>% 
+  left_join(attorney_time_state, by = "StateAbbr") %>%
+  mutate(casePer = total_questions/num_attorney) %>% 
+  ggplot(aes(
+    x = casePer,
+    y = response_rate)
+  ) +
+  geom_point(aes(color = StateAbbr)) +
+  geom_text_repel(
+    mapping = aes(label = StateAbbr, color = StateAbbr)
+  ) +
+  ylim(0, 1) +
+  xlab("Total Number of Questions Per Active Attorney") +
+  ylab("Response Rate (Questions / Questions Taken by Attorney)") +
+  ggtitle("Response Rate vs. Number of Questions per Active Attorney by State") +
+  theme(legend.position="none")
+```
+
+![](Report_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
 To answer this, we calculated the number of unique attorneys per state
 that logged any time on the website within our 2 year time scale. We
