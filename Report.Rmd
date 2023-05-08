@@ -5,6 +5,8 @@ author: "Brooke Moss, Lily Jiang, Anna Letcher Hartman, Bethany Costello"
 output:
   github_document:
     toc: true
+  pdf_document:
+    toc: true
 ---
 
 ```{r import-libraries, echo=FALSE, message=FALSE, warning=FALSE}
