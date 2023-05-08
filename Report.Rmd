@@ -120,11 +120,9 @@ attorney_time_state <-
 
 ### The Dataset
 
-During DataFest 2023, we were given datasets representing the American Bar Association's Free Legal Answer Program (ABA FLA).
+During DataFest 2023, we were given datasets representing the American Bar Association's Free Legal Answers program (ABA FLA). The Free Legal Answers program is an online platform where the ABA provides pro bono (free of charge) legal services to most US states. Qualifying people (based on income thresholds) can submit questions to be researched and answered by volunteer lawyers [DataFest Challenge Description].
 
-<!--# Add additional dataset background -->
-
-<!--# Add discussion of dataset trust -->
+The data we received represents a full history of the program from August 2016 to January 2022, including client information, attorney information, correspondence details, and conversation text. <!--# Add discussion of dataset trust -->
 
 ### Methodology
 
@@ -132,9 +130,7 @@ Using this data, our team investigated disparities in attorney response rates ac
 
 We determined that if an attorney "accepted" a question, taking it into their purview, we would count that as a question that has been responded to. However, if no attorney accepted the question, we would count that as a non-response.
 
-In order to count responses, we used the `TakenByAttorneyUno` variable from the `questions.csv` dataset. This variable represents the unique identifier of the attorney that accepted the question. If the column value was `NULL`, we counted that as a non-response. This is surely an under-counting of questions that were unresolved, as this column indicates whether or not an attorney responded to the original question. This fails to account for non-response cases in which a conversation occurs between client and attorney before an attorney stops responding or questions left unresolved.
-
-<!--# Add more discussion of potential causes of uncertainty in the data and our calculations -->
+In order to count responses, we used the `TakenByAttorneyUno` variable from the `questions.csv` dataset. This variable represents the unique identifier of the attorney that accepted the question. If the column value was `NULL`, we counted that as a non-response. This is surely an under-counting of questions that were unresolved, as this column indicates whether or not an attorney responded to the original question. This fails to account for non-response cases in which a conversation occurs between client and attorney before an attorney stops responding or questions left unresolved. This is likely not the only source of uncertainty in our exploration, as things such as the process of collecting attorneys' logged hours introduce additional points of uncertainty.
 
 ### Our Question
 
