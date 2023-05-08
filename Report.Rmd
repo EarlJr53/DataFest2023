@@ -137,16 +137,43 @@ In order to count responses, we used the `TakenByAttorneyUno` variable from the 
 ### Our Question
 
 ```{r}
+# Create a helper tibble connecting FIPS codes with counties
+states_and_fips <- fips_codes %>%
+  mutate(
+    fips = paste0(state_code, county_code)
+  ) %>%
+  select(state, county, fips) %>%
+  mutate(county = str_remove_all(county, " County"))
+
+# Count the number of questions unanswered from each county in the US
+questions_by_county <- questions %>%
+  left_join(select(clients, -Id), by = c("StateAbbr", "AskedByClientUno" = "ClientUno")) %>%
+  group_by(County, StateAbbr) %>%
+  mutate(
+    is_null = 1 * (TakenByAttorneyUno == "NULL"),
+  ) %>%
+  count(is_null) %>%
+  pivot_wider(
+    names_from = "is_null",
+    names_prefix = "null",
+    values_from = "n"
+  ) %>%
+  mutate(
+    null_percent = null1 / (null0 + null1)
+  ) %>%
+  drop_na() %>%
+  left_join(states_and_fips, by = c("County" = "county", "StateAbbr" = "state")) %>%
+  arrange(desc(null_percent)) %>%
+  drop_na()
+
+# Plot the null response rates by county for Texas and Florida
 plot_usmap(include = c("FL", "TX"), regions = "counties", data = questions_by_county, values = "null_percent", color = NA) +
   scale_fill_continuous(
     low = "white", high = "red", name = "Nonresponse rate", label = scales::comma
   ) +
   labs(title = "Nonresponse rates for Texas and Florida") +
   theme(legend.position = "bottom")
-
 ```
-
-<!--# Add `AskedOnUtc` plot?? -->
 
 ```{r}
 questions %>% 
@@ -175,7 +202,6 @@ We narrowed down the states to investigate by limiting our time scale to Jan 1st
 ```{r hours-perattorney, echo=FALSE, message=FALSE, warning=FALSE}
 
 # Plot response rate for each state versus the number of active attorneys in the state
-
 df_responses %>% 
   left_join(attorney_time_state, by = "StateAbbr") %>%
   ggplot(mapping = aes(
@@ -194,7 +220,24 @@ df_responses %>%
   theme(legend.position="none")
 ```
 
-<!--# Add plot of Questions v. # of Attorneys -->
+```{r}
+df_responses %>% 
+  left_join(attorney_time_state, by = "StateAbbr") %>%
+  mutate(casePer = total_questions/num_attorney) %>% 
+  ggplot(aes(
+    x = casePer,
+    y = response_rate)
+  ) +
+  geom_point(aes(color = StateAbbr)) +
+  geom_text_repel(
+    mapping = aes(label = StateAbbr, color = StateAbbr)
+  ) +
+  ylim(0, 1) +
+  xlab("Total Number of Questions Per Active Attorney") +
+  ylab("Response Rate (Questions / Questions Taken by Attorney)") +
+  ggtitle("Response Rate vs. Number of Questions per Active Attorney by State") +
+  theme(legend.position="none")
+```
 
 To answer this, we calculated the number of unique attorneys per state that logged any time on the website within our 2 year time scale. We also calculated the total number of hours per state. This allowed us to calculate the average time spent per attorney by state. We compared this against the response rate and created a scatter plot. We also plotted the average number of questions per active attorney over the response rate. This allowed us to better explain the disparities found within Georgia, Oklahoma, and Arizona. All had a low number of hours logged by the attorney, as well as had a high number of questions per attorney. This is especially true in Arizona, with almost 160 questions per attorney. It is clear that demand far outweighs supply in these states. Texas was not as straightforward. They had a similar number of questions per attorney as Florida, but with a much lower response rate. Even more strangely, they had an exorbitant amount of hours spent per question. We looked to see if there was a higher number of average posts per question, but Texas didn't seem to be any diﬀerent than other states.
 
