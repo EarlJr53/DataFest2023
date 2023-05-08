@@ -31,9 +31,9 @@ answered by volunteer lawyers \[DataFest Challenge Description\].
 The data we received represents a full history of the program from
 August 2016 to January 2022, including client information, attorney
 information, correspondence details, and conversation text. The dataset
-seems to be completely comprehensive as it contains all questions asked
-through the online FLA program. However, because some of the variables
-(such as the hours logged by each attorney) are reliant on
+appears to be completely comprehensive as it contains all questions
+asked through the online FLA program. However, because some of the
+variables (such as the hours logged by each attorney) are reliant on
 self-reporting measures, parts of the dataset are not particularly
 trustworthy. These variables contain variation that is impossible to
 account for.
